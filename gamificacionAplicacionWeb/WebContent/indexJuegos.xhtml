@@ -1,0 +1,379 @@
+<html xmlns="http://www.w3c.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+	<title>Menu</title>
+	<h:outputStylesheet library="css" name="miEstilo.css" />
+	<h:outputStylesheet library="css" name="adminJuegos.css" />
+</h:head>
+
+<h:body id="general">
+
+	<div id="divTop">
+
+		<h:form>
+			<p:menubar id="menubar" styleClass="resaltar1">
+
+
+				<p:menuitem id="home" cssClass="estiloHome"
+					url="http://localhost:8081/login_view/index.xhtml">
+					<img src="logoADJA.png" alt="AJDA" width="75" height="50" />
+				</p:menuitem>
+
+
+				<p:menuitem id="salir" icon="ui-icon-extlink"
+					url="http://localhost:8081/login_view/login.xhtml" />
+
+				<p:submenu id="menu" label="Menu">
+					<p:menuitem value="Buscador de partidas" />
+					<p:menuitem value="Buscador de plantillas" />
+					<p:menuitem value="Estadísticas" />
+					<p:menuitem value="Datos personales" />
+				</p:submenu>
+
+				<f:facet name="options">
+					<p:outputLabel value="¡Bienvenid@, "></p:outputLabel>
+					<p:outputLabel value="#{loginBean.p.nombre}"></p:outputLabel>
+					<p:outputLabel value="!"></p:outputLabel>
+
+				</f:facet>
+
+				<p:menuitem id="menuJuegos" value="Juegos" icon="ui-icon-gear"
+					url="http://localhost:8081/login_view/indexJuegos.xhtml"
+					rendered="#{loginBean.p.rol != 'USER'}" />
+				<p:menuitem id="menuUsuarios" value="Usuarios" icon="ui-icon-gear"
+					url="http://localhost:8081/login_view/indexUsuarios.xhtml"
+					rendered="#{loginBean.p.rol == 'SUPER'}" />
+
+
+			</p:menubar>
+		</h:form>
+
+	</div>
+
+
+	<div id="contenido">
+		<h:form id="formContenido">
+			
+        		
+    		
+			<div id="divSuperior">
+				<p:fieldset legend="Filtrar" toggleable="true" toggleSpeed="500">
+					<p:panelGrid id="pgForm" styleClass="ui-noborder tablaFiltrado">
+						<p:remoteCommand name="rcFiltros" update="juegoList"
+							actionListener="#{gestionJuegosBean.aplicarFiltros}"
+							process="pgForm" />
+						<h:form inline="true">
+							<p:row>
+								<p:column colspan="1" styleClass="columnasFiltrado">
+									<p:triStateCheckbox
+										value="#{gestionJuegosBean.ilimitadasFiltro}"
+										itemLabel="Preguntas ilimitadas" onchange="rcFiltros()" />
+
+								</p:column>
+
+								<p:column colspan="1" styleClass="columnasFiltrado">
+
+									<p:outputLabel for="minJug" value="Jugadores:" />
+									<p:spinner id="minJug"
+										value="#{gestionJuegosBean.minJugadoresFiltro}" min="0"
+										max="100" styleClass="spinners" onchange="rcFiltros()" />
+									<p:outputLabel value="  -  " />
+									<p:spinner id="maxJug"
+										value="#{gestionJuegosBean.maxJugadoresFiltro}" min="0"
+										max="100" onchange="rcFiltros()" />
+
+								</p:column>
+								<p:column colspan="1" styleClass="columnasFiltrado">
+
+									<p:outputLabel for="minPregm" value="Mínimo de preguntas:" />
+									<p:spinner id="minPregm"
+										value="#{gestionJuegosBean.minPreguntasMinimasFiltro}" min="0"
+										max="100" onchange="rcFiltros()" />
+									<p:outputLabel value="  -  " />
+									<p:spinner id="maxPregm"
+										value="#{gestionJuegosBean.maxPreguntasMinimasFiltro}" min="0"
+										max="100" onchange="rcFiltros()" />
+
+								</p:column>
+								<p:column colspan="1" styleClass="columnasFiltrado">
+
+									<p:outputLabel for="minPregM" value="Máximo de preguntas:" />
+									<p:spinner id="minPregM"
+										value="#{gestionJuegosBean.minPreguntasMaximasFiltro}" min="0"
+										max="100" onchange="rcFiltros()" />
+									<p:outputLabel value="  -  " />
+									<p:spinner id="maxPregM"
+										value="#{gestionJuegosBean.maxPreguntasMaximasFiltro}" min="0"
+										max="100" onchange="rcFiltros()" />
+
+								</p:column>
+
+
+							</p:row>
+						</h:form>
+
+						<p:row>
+							<p:column colspan="2">
+
+								<p:outputLabel for="respuesta" value="Forma de respuesta: " />
+								<p:selectCheckboxMenu id="respuesta"
+									value="#{gestionJuegosBean.respuestaSelectFiltro}"
+									multiple="true" onchange="rcFiltros()"
+									styleClass="tablaFiltrado">
+									<f:selectItem itemLabel="Sin respuesta" itemValue="0"></f:selectItem>
+									<f:selectItem itemLabel="Respuestas con opciones (A,B,C,...)"
+										itemValue="1"></f:selectItem>
+									<f:selectItem itemLabel="Cifras" itemValue="2"></f:selectItem>
+									<f:selectItem itemLabel="Campos de texto" itemValue="3"></f:selectItem>
+									<f:selectItem itemLabel="Respuestas de relacionar"
+										itemValue="4"></f:selectItem>
+								</p:selectCheckboxMenu>
+							</p:column>
+
+							<p:column colspan="2">
+								<p:outputLabel for="etapa2" value="Etapa recomendada:" />
+								<p:selectCheckboxMenu id="etapa2"
+									value="#{gestionJuegosBean.etapasFiltro}" label="e"
+									multiple="true" onchange="rcFiltros()"
+									styleClass="tablaFiltrado" updateLabel="true">
+									<f:selectItems value="#{gestionJuegosBean.listaEtapas}" var="e"
+										itemLabel="#{e.descripcion}" itemValue="#{e.id}" />
+								</p:selectCheckboxMenu>
+							</p:column>
+
+						</p:row>
+					</p:panelGrid>
+				</p:fieldset>
+			</div>
+			<div id="divInferior" style="margin-top: 20px">
+				<div id="divListado" style="width: 25%; float: left">
+					<p:orderList id="juegoList"
+						value="#{gestionJuegosBean.juegosFiltrados}" var="Juego"
+						itemValue="#{Juego}" converter="juegoConverterGestion"
+						controlsLocation="none" responsive="true">
+						<p:ajax event="select"
+							listener="#{gestionJuegosBean.onSelectJuego}"
+							update="fieldsetForm" />
+						<f:facet name="caption">Juegos</f:facet>
+						<p:column>
+							<h:outputText id="n" value="#{Juego.nombre}" />
+						</p:column>
+					</p:orderList>
+				</div>
+
+				<div id="divFormulario" style="width: 73%; float: right;">
+
+					<p:fieldset id="fieldsetForm"
+						legend="#{gestionJuegosBean.fieldLegend}">
+						
+						<p:commandButton value="Añadir"
+							actionListener="#{gestionJuegosBean.add}" update="formContenido"
+							rendered="#{!gestionJuegosBean.verModificar}" />
+						<p:commandButton value="Guardar Cambios"
+							actionListener="#{gestionJuegosBean.modificar}"
+							update="formContenido"
+							rendered="#{gestionJuegosBean.verModificar}" />
+						<p:commandButton value="Eliminar"
+							actionListener="#{gestionJuegosBean.eliminar}"
+							update="formContenido"
+							rendered="#{gestionJuegosBean.verModificar}" />
+						<p:commandButton value="Limpiar datos" process="@this"
+							actionListener="#{gestionJuegosBean.resetForm}"
+							update="fieldsetForm" />
+
+						<p:messages id="messages" showDetail="true"/>
+						<p:fieldset legend="Características" toggleable="true"
+							toggleSpeed="500">
+							<p:panelGrid id="pgCaracteristicas"
+								styleClass="ui-noborder tablaFiltrado">
+								<p:row>
+									<p:column colspan="2" styleClass="columnasNuevoJuego">
+										<p:outputLabel for="name" value="Nombre: " />
+										<p:inputText id="name" required="true"
+											value="#{gestionJuegosBean.juegoform.nombre}" 
+											requiredMessage="El campo Nombre es obligatorio (*)"/>
+
+									</p:column>
+
+									<p:column colspan="2" rowspan="2"
+										styleClass="columnasNuevoJuego">
+										<p:outputLabel for="desc" value="Descripción: " />
+										<p:inputTextarea rows="6" cols="30" id="desc" required="false"
+											value="#{gestionJuegosBean.juegoform.descripcion}" 
+											requiredMessage="El campo Descripción es obligatorio (*)"/>
+									</p:column>
+
+									<p:column colspan="2" styleClass="columnasNuevoJuego">
+										<p:outputLabel for="tipoRespuestas"
+											value="Tipo de respuestas:" />
+										<p:selectOneMenu id="tipoRespuestas"
+											value="#{gestionJuegosBean.tipoRespuesta}">
+											<f:selectItem itemLabel="Sin respuesta" itemValue="0"></f:selectItem>
+											<f:selectItem itemLabel="Respuestas con opciones (A,B,C,...)"
+												itemValue="1"></f:selectItem>
+											<f:selectItem itemLabel="Cifras" itemValue="2"></f:selectItem>
+											<f:selectItem itemLabel="Campos de texto" itemValue="3"></f:selectItem>
+											<f:selectItem itemLabel="Respuestas de relacionar"
+												itemValue="4"></f:selectItem>
+
+										</p:selectOneMenu>
+									</p:column>
+
+								</p:row>
+								<p:row>
+									<p:column colspan="2" styleClass="columnasNuevoJuego">
+										<p:outputLabel for="etapa" value="Etapa recomendada:" />
+										<p:selectCheckboxMenu id="etapa"
+											value="#{gestionJuegosBean.etapasSeleccionadas}" label="e"
+											multiple="true" updateLabel="true">
+											<f:selectItems value="#{gestionJuegosBean.listaEtapas}"
+												var="e" itemLabel="#{e.descripcion}" itemValue="#{e.id}" />
+										</p:selectCheckboxMenu>
+									</p:column>
+
+									<p:column colspan="2" styleClass="columnasNuevoJuego">
+										<p:outputLabel for="estiloJuego" value="Estilo de juego:" />
+										<p:selectOneMenu id="estiloJuego"
+											value="#{gestionJuegosBean.estiloJuego}">
+
+											<f:selectItem itemLabel="Clásico" itemValue="CLASIC"></f:selectItem>
+											<f:selectItem itemLabel="Concurso TV" itemValue="TV"></f:selectItem>
+											<f:selectItem itemLabel="Deporte" itemValue="SPORT"></f:selectItem>
+											<f:selectItem itemLabel="Ideado por AJDA" itemValue="AJDA"></f:selectItem>
+										</p:selectOneMenu>
+									</p:column>
+								</p:row>
+							</p:panelGrid>
+
+
+						</p:fieldset>
+						<p:fieldset legend="Ficheros de preguntas" toggleable="true"
+							toggleSpeed="500">
+							<p:panelGrid id="pgFicheros"
+								styleClass="ui-noborder tablaFiltrado">
+								<p:row>
+									<p:column colspan="2" styleClass="columnasNuevoJuego">
+										<p:selectBooleanCheckbox id="pIlimitadas"
+											value="#{gestionJuegosBean.juegoform.pregIlimitadas}"
+											itemLabel="Preguntas ilimitadas" />
+									</p:column>
+
+									<p:column colspan="2" styleClass="columnasNuevoJuego">
+										<p:outputLabel for="fichero"
+											value="Tipo de fichero de preguntas:" />
+										<p:spinner id="fichero"
+											value="#{gestionJuegosBean.juegoform.tipoFich}" min="0" />
+									</p:column>
+									<p:column styleClass="columnasNuevoJuego">
+										<p:outputLabel for="numFichMin"
+											value="Número de ficheros mínimos:" />
+										<p:spinner id="numFichMin" min="0"
+											value="#{gestionJuegosBean.juegoform.numFichMin}" />
+									</p:column>
+
+								</p:row>
+								<p:row>
+
+									<p:column colspan="2" styleClass="columnasNuevoJuego">
+										<p:selectBooleanCheckbox id="carga"
+											value="#{gestionJuegosBean.juegoform.cargaCompleta}"
+											itemLabel="Carga completa" />
+									</p:column>
+									<p:column colspan="2" styleClass="columnasNuevoJuego">
+										<p:outputLabel for="preguntas"
+											value="Número de preguntas mínimas:" />
+										<p:spinner id="preguntas" min="1"
+											value="#{gestionJuegosBean.juegoform.pregMin}" />
+									</p:column>
+
+									<p:column colspan="2" styleClass="columnasNuevoJuego">
+										<p:outputLabel for="numFichMax"
+											value="Número de ficheros máximos:" />
+										<p:spinner id="numFichMax" min="1"
+											value="#{gestionJuegosBean.juegoform.numFichMax}" />
+									</p:column>
+
+
+
+								</p:row>
+
+
+							</p:panelGrid>
+
+						</p:fieldset>
+						<p:fieldset id="fieldRecursos" legend="Ubicación de los recursos" toggleable="true"
+							toggleSpeed="500">
+							
+							<p:fileUpload mode="advanced" dragDropSupport="true"
+								fileLimit="1" label="Examinar..." uploadLabel="Subir"
+								cancelLabel="Cancelar"
+								fileLimitMessage="Número máximo de ficheros excedido" 
+								allowTypes="/(\.|\/)(zip)$/" 
+								invalidFileMessage="Tipo de archivo inválido. Debe adjuntarse un .zip."
+								fileUploadListener="#{gestionJuegosBean.handleFileUpload}"
+								rendered="#{!gestionJuegosBean.ficheroSubido}"
+								update="fieldsetForm"
+								execute="name"
+								/>
+								
+							<h:outputText style="font-weight: bold;" value="#{gestionJuegosBean.juegoform.nombreZip}"
+							rendered="#{gestionJuegosBean.ficheroSubido}"/>
+							
+							<p:commandButton style="margin-left:10px;" 
+							value="Cambiar zip"
+							rendered="#{gestionJuegosBean.ficheroSubido}"
+							update="fieldsetForm"
+							process="@this"
+							actionListener="#{gestionJuegosBean.cambiarZip}"/>
+							
+
+						</p:fieldset>
+						<p:fieldset legend="Jsons de configuración" toggleable="true"
+							toggleSpeed="500">
+							<p:panelGrid id="pgJson" styleClass="ui-noborder tablaFiltrado">
+								<p:row>
+									<p:column colspan="2">
+										<p:outputLabel for="respuestas"
+											value="Json 'Parámetros de introducción de respuestas':" />
+										<p:inputTextarea rows="6" cols="30" id="respuestas"
+											value="#{gestionJuegosBean.juegoform.jsonRespuestas}" />
+									</p:column>
+									<p:column colspan="2">
+										<p:outputLabel for="configuracion"
+											value="Json 'Parámetros de configuración de partidas':" />
+										<p:inputTextarea rows="6" cols="30" id="configuracion"
+											value="#{gestionJuegosBean.juegoform.jsonParametrosConf}" />
+									</p:column>
+								</p:row>
+								<p:row>
+									<p:column colspan="2">
+										<p:outputLabel for="equipos"
+											value="Json 'Parámetros de grupos, equipos y valores iniciales':" />
+										<p:inputTextarea rows="6" cols="30" id="equipos"
+											value="#{gestionJuegosBean.juegoform.jsonEquipos}" />
+									</p:column>
+									<p:column colspan="2">
+										<p:outputLabel for="otrosDatos"
+											value="Json 'Parámetros de introducción de otros datos durante el juego':" />
+										<p:inputTextarea rows="6" cols="30" id="otrosDatos"
+											value="#{gestionJuegosBean.juegoform.jsonOtrosDatos}" />
+									</p:column>
+								</p:row>
+							</p:panelGrid>
+						</p:fieldset>
+
+					</p:fieldset>
+				</div>
+
+			</div>
+
+
+
+		</h:form>
+
+	</div>
+</h:body>
+</html>

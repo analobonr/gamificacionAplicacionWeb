@@ -1,0 +1,46 @@
+a[id*=menuJuegos]{
+	background-color:white;
+	
+}
+
+
+#filtrado span, #filtrado label{
+	font-size:14px;
+}
+
+.tablaFiltrado{
+	width: 100% !important;
+	text-align: center;
+}
+
+.columnasFiltrado{
+	width:25%;
+}
+
+span[id*=maxJug], span[id*=minJug], span[id*=minPregm], span[id*=minPregM],span[id*=maxPregm],span[id*=maxPregM]{
+	width: 60px;
+}
+
+span[id*=maxJug] > input, span[id*=minJug] > input, span[id*=minPregm] > input, span[id*=minPregM] > input,span[id*=maxPregm] > input,span[id*=maxPregM] > input{
+	width: inherit;
+}
+
+.columnasNuevoJuego{
+	width:33%;
+}
+
+
+
+div[id*=etapa], input[id*=name], div[id*=tipoRespuestas], div[id*=estiloJuego]{
+	width:90% !important;
+}
+
+div[id*=tipoRespuestas_panel], div[id*=estiloJuego_panel],div[id*=etapa_panel]{
+	width:auto !important;
+}
+
+div[id*=carga], div[id*=pIlimitadas]{
+	float: left;
+	margin-left: 20%;
+}
+

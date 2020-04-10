@@ -1,0 +1,52 @@
+#login {
+	width:100%;
+	margin:auto;
+	display: inline-block;
+}
+
+#loginBody{
+	background:rgb(84,135,164,0.7); /*Azulino*/
+	text-align:center;
+	font-size:0.75em;
+	margin:auto;
+	width: 100%;
+	color:white;
+}
+
+#panelBar{
+	background:rgb(84,135,164,0.7); /*Azulino*/
+	text-align:left;
+	color:white;
+	
+}
+
+#panelBar > div {
+	display:flex;
+}
+
+#cabecera{
+	width:50%;
+	
+}
+
+
+
+#panelInfo{
+	text-align: justify;
+	margin:10px;
+	margin-top:50px;
+	
+}
+
+#panelInfo > div{
+	color:#545b66;
+	font-size:1.1em;
+	font-weight:bold;
+}
+
+.ui-growl-info {
+    background-color: #ffe399;
+    border: 0 none;
+    color: #212121;
+    
+}

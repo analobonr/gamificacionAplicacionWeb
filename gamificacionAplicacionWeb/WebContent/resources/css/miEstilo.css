@@ -1,0 +1,176 @@
+#general{
+	background-color:RGB(173, 210, 208,0.5); /*Celestito*/
+	text-align:center;
+	font-size:0.75em;
+	margin:auto;
+	width: 100%;
+	
+}
+
+.resaltar1{
+	background:rgb(84,135,164,0.7); /*Azulino*/
+	
+	width: 100%;
+	border-color: black;
+}
+
+.resaltarLetra{
+	color:white;
+	font-size:1.5em;
+}
+
+.resaltar2{
+	background-color:#d3d7cf !important; /*Gris*/
+	border-color: black !important;
+}
+
+
+#tb{
+	
+	width:99%;
+	margin:auto;
+}
+
+
+#contenido{
+	margin: 20px;
+	width:95%;
+	display:inline-block;
+	
+}
+
+#panelLeft{
+	width:49% !important;
+	margin-right:1%;
+	float:left !important;
+}
+
+#panelRight{
+	width:49% !important;
+	margin-left:1%;
+	float:right !important;
+}
+
+.textoClaro{
+	
+	color:white !important;
+	font-size:0.75em;
+	font-weight: bold !important;
+	
+}
+
+.boton{
+	background:white;
+}
+
+
+
+.textoIzquierda{
+	text-align:left;
+}
+
+.textoDerecha{
+	text-align:right;
+}
+
+div[id*=panelGridList] div div{
+	text-align:left;
+}
+
+div[id*=panelGridList] div div{
+	text-align:left;
+}
+
+div[id*=panelGridList] div div:nth-child(2){
+	text-align:right;
+}
+
+#panelVisible{
+	visibility:none;
+}
+
+#panelInvisible{
+	display:none;
+}
+
+#panelLeft > div > div:first-child{
+	background:0;
+	background-color:rgb(84,135,164,0.7);
+	
+}
+
+.ui-widget-header{
+	background:0;
+	background-color:rgb(84,135,164,0.7);
+	border: 1px solid black;
+	
+}
+
+.ui-widget-content {
+
+    border: 1px solid black;
+}
+
+.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
+
+    border: 1px solid black;
+    background-color:#d3d7cf;
+}
+
+
+ a[id*=salir] {
+	border: 1px solid black !important;
+	background-color: #d3d7cf;
+	font-size:1.2em;
+	
+}
+
+div[id*=menubar] ul li:nth-child(2) , li[id*=menu], div[id*=menubar] ul li:nth-child(4) , div[id*=menubar] ul li:nth-child(5) {
+	float:right !important;
+}
+
+li[id*=menu] > a{
+	
+	margin-right: 10px;
+	
+}
+
+div[id*=menubar] > ul > li:last-child{
+	float:left !important;
+	font-weight: bold;
+	margin-left:10px;
+	color:white;
+	font-size:1.5em;
+	
+}
+
+a[id*=home] {
+	padding:0 !important;
+	border: none !important;
+}
+
+.ui-helper-reset{
+	line-height:2.5 !important;
+}
+
+#confPartidaDialog{
+	width: 1069px;
+
+	height: 472px;
+
+	left: 75px !important;
+
+	top: 75px !important;
+	
+}
+
+label[id*=rol]{
+	color: #333;
+    font-size: 0.6em !important;
+    font-family: "Arial Black", Gadget, sans-serif;
+
+}
+
+
+
+
