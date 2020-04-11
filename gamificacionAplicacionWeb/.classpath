@@ -26,7 +26,7 @@
 			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/home/dit/LIB_HOME/primefaces-6.1.jar">
+	<classpathentry kind="lib" path="/home/dit/git/gamificacionAplicacionWebRepository/gamificacionAplicacionWeb/WebContent/WEB-INF/lib/primefaces-6.1.jar">
 		<attributes>
 			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
 		</attributes>
