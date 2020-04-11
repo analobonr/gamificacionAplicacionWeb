@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>login_view</name>
+	<name>gamificacionAplicacionWeb</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -28,11 +28,4 @@
 		<nature>org.eclipse.jdt.core.javanature</nature>
 		<nature>org.eclipse.wst.jsdt.core.jsNature</nature>
 	</natures>
-	<linkedResources>
-		<link>
-			<name>WebContent/WEB-INF/lib/primefaces-6.1.jar</name>
-			<type>1</type>
-			<location>/home/dit/LIB_HOME/primefaces-6.1.jar</location>
-		</link>
-	</linkedResources>
 </projectDescription>
