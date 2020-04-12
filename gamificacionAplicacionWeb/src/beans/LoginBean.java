@@ -13,6 +13,8 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -78,6 +80,11 @@ public class LoginBean implements Serializable{
 				 FacesContext context = FacesContext.getCurrentInstance();
 			     context.addMessage(null, new FacesMessage(Mensajes.HEADERUPS,  Mensajes.ERRORACCESO) );
 			 }else {
+				 //Creamos la sesion del usuario
+				 HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+				 HttpSession userSession = request.getSession(true);
+				 userSession.setAttribute("profesor", p);
+				 
 				 FacesContext contex = FacesContext.getCurrentInstance();
 		         try {
 					contex.getExternalContext().redirect(URLs.URLIndex);
