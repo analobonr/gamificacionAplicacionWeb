@@ -43,14 +43,7 @@ public class PartidasBean implements Serializable{
 		login = (Profesor) this.userSession.getAttribute("profesor");
 		
 		ExternalContext eContext = FacesContext.getCurrentInstance().getExternalContext();
-		FacesContext context = FacesContext.getCurrentInstance();
-		String servername = eContext.getRequestServerName();
-		int port = eContext.getRequestServerPort();
-		String uri = eContext.getRequestContextPath();
-		String url ="http://"+servername+":"+port+uri;
-		
-		String url2 = request.getRequestURL().toString();
-		System.out.println(url2);
+
 		if(login == null) {
 			try{
 				

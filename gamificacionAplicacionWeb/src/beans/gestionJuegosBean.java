@@ -16,7 +16,10 @@ import java.util.zip.ZipInputStream;
 import javax.annotation.ManagedBean;
 import javax.annotation.PostConstruct;
 import javax.faces.application.FacesMessage;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.event.SelectEvent;
@@ -34,8 +37,10 @@ import constantes.URLs;
 import pojos.Estado;
 import pojos.Etapa;
 import pojos.Juego;
+import pojos.Profesor;
 import pojos.configuracionEquipos.ParametrosGE;
 import constantes.valoresDesplegables.estilosJuego_t;
+import constantes.valoresDesplegables.rol_t;
 
 /*Bean que maneja los datos de partidaForm para la configuración de una partida*/
 
@@ -44,6 +49,7 @@ public class gestionJuegosBean implements Serializable {
 
 	private static final long serialVersionUID = 3885381981170292304L;
 
+	private Profesor login;
 	
 	//Propiedades para el formulario
 	public Juego juegoform;
@@ -79,12 +85,30 @@ public class gestionJuegosBean implements Serializable {
 	@PostConstruct
 	public void init() {
 		
-		this.juegoform = new Juego();
-		this.juegosListadoCompleto = this.listarJuegos();
-		this.juegosFiltrados = this.juegosListadoCompleto;
-		this.verModificar = false;
-		this.fieldLegend = "Nuevo Juego";
-		this.ficheroSubido = false;
+		//Obtenemos la session del usuario
+		HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+		HttpSession userSession = request.getSession(true);
+		login = (Profesor) userSession.getAttribute("profesor");
+		
+		ExternalContext eContext = FacesContext.getCurrentInstance().getExternalContext();
+
+		if((login == null) || (login.getRol() == rol_t.USER)) {
+			try{
+				
+	            eContext.redirect( eContext.getRequestContextPath() + URLs.pathlogin );
+			}catch(  Exception e ){
+				System.out.println( "Me voy al carajo, no funciona esta redireccion" );
+				
+			}
+			
+		}else {
+			this.juegoform = new Juego();
+			this.juegosListadoCompleto = this.listarJuegos();
+			this.juegosFiltrados = this.juegosListadoCompleto;
+			this.verModificar = false;
+			this.fieldLegend = "Nuevo Juego";
+			this.ficheroSubido = false;
+		}
 	}
 
 	public void add() {

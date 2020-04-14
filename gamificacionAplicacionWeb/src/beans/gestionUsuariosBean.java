@@ -7,7 +7,10 @@ import java.util.ArrayList;
 
 import javax.annotation.ManagedBean;
 import javax.annotation.PostConstruct;
+import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.primefaces.context.RequestContext;
 import org.springframework.core.ParameterizedTypeReference;
@@ -34,13 +37,36 @@ public class gestionUsuariosBean implements Serializable {
 	private List<Profesor> filteredUsers;
 	private Profesor selectedUser;
 	private List<Profesor> selectedUsers;
+	
+	private Profesor login;
+	
 	@PostConstruct
     public void init() {
+		//Obtenemos la session del usuario
+		HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+		HttpSession userSession = request.getSession(true);
+		login = (Profesor) userSession.getAttribute("profesor");
+		
+		ExternalContext eContext = FacesContext.getCurrentInstance().getExternalContext();
+
+		if((login == null) || (login.getRol() != rol_t.SUPER)) {
+			try{
+				
+	            eContext.redirect( eContext.getRequestContextPath() + URLs.pathlogin );
+			}catch(  Exception e ){
+				System.out.println( "Me voy al carajo, no funciona esta redireccion" );
+				
+			}
+			
+		}else {
         //Obtenemos la lista de usuarios
-		this.users = this.listarProfesores();
+			this.users = this.listarProfesores();
+		}
     }
 	
 	public List<Profesor> listarProfesores(){
+		
+		
 		
 		String url = URLs.LISTUSUARIOS;
 		System.out.println("Petición de lista de usuarios: "+url);
