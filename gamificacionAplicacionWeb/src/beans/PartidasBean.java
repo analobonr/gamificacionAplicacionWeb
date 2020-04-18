@@ -11,6 +11,7 @@ import javax.faces.bean.ManagedProperty;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -20,6 +21,7 @@ import org.springframework.web.client.RestTemplate;
 import constantes.URLs;
 import pojos.ConfPartida;
 import pojos.Partida;
+import pojos.Profesor;
 
 
 @ManagedBean
@@ -30,24 +32,19 @@ public class PartidasBean implements Serializable{
 	
 	private List<Partida> partidasEnCurso;
 	private List<ConfPartida> misPartidas;
-	
-	@ManagedProperty(value="#{loginBean}")
-	private LoginBean login;
-	
+	private HttpSession userSession;
+	private Profesor login;
 
 	@PostConstruct
     public void init() {
-		ExternalContext eContext = FacesContext.getCurrentInstance().getExternalContext();
-		FacesContext context = FacesContext.getCurrentInstance();
-		String servername = eContext.getRequestServerName();
-		int port = eContext.getRequestServerPort();
-		String uri = eContext.getRequestContextPath();
-		String url ="http://"+servername+":"+port+uri;
+		//Obtenemos la session del usuario
+		HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+		this.userSession = request.getSession(true);
+		login = (Profesor) this.userSession.getAttribute("profesor");
 		
-		HttpServletRequest request = (HttpServletRequest) eContext.getRequest();
-		String url2 = request.getRequestURL().toString();
-		System.out.println(url2);
-		if((login == null) || (login.getEmail() == null)) {
+		ExternalContext eContext = FacesContext.getCurrentInstance().getExternalContext();
+
+		if(login == null) {
 			try{
 				
 	            eContext.redirect( eContext.getRequestContextPath() + URLs.pathlogin );
@@ -118,11 +115,11 @@ public class PartidasBean implements Serializable{
 		this.misPartidas = misPartidas;
 	}
 	
-	public void setLogin(LoginBean login) {
+	public void setLogin(Profesor login) {
 		this.login = login;
 	}
 
-	public LoginBean getLogin() {
+	public Profesor getLogin() {
 		return login;
 	}
 

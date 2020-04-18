@@ -16,12 +16,12 @@
 			<p:menubar id="menubar" styleClass="resaltar1">
 		 
 		    
-		    	<p:menuitem id="home" cssClass="estiloHome" url="http://localhost:8081/gamificacionAplicacionWeb/index.xhtml">
+		    	<p:menuitem id="home" cssClass="estiloHome" url="/index.xhtml">
 		    		<img src="logoADJA.png" alt="AJDA" width="75" height="50"/>
 		    	</p:menuitem>
 		    
         	
-        	<p:menuitem id="salir" icon="ui-icon-extlink" url="http://localhost:8081/gamificacionAplicacionWeb/login.xhtml"/>
+        	<p:menuitem id="salir" icon="ui-icon-extlink" actionListener="#{loginBean.cerrarSesion}" oncomplete="window.location.href ='./login.xhtml'"/>
         	
         	<p:submenu id="menu" label="Menu" >
 	            <p:menuitem value="Buscador de partidas" />
@@ -38,8 +38,8 @@
 		      
 		    </f:facet>
 		    
-		    <p:menuitem id="menuJuegos" value="Juegos" icon="ui-icon-gear" url="http://localhost:8081/login_view/indexJuegos.xhtml" rendered="#{loginBean.p.rol != 'USER'}"/>
-		    <p:menuitem id="menuUsuarios" value="Usuarios" icon="ui-icon-gear" url="http://localhost:8081/login_view/indexUsuarios.xhtml" rendered="#{loginBean.p.rol == 'SUPER'}"/>
+		    <p:menuitem id="menuJuegos" value="Juegos" icon="ui-icon-gear" url="/indexJuegos.xhtml" rendered="#{loginBean.p.rol != 'USER'}"/>
+		    <p:menuitem id="menuUsuarios" value="Usuarios" icon="ui-icon-gear" url="/indexUsuarios.xhtml" rendered="#{loginBean.p.rol == 'SUPER'}"/>
 	    
         	
 			</p:menubar>
