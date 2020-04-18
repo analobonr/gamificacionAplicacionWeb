@@ -176,6 +176,13 @@ public class LoginBean implements Serializable{
 		
 	}
 
+
+	//Cierra la sesion del usuario
+	public void cerrarSesion() {
+		HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+		HttpSession userSession = request.getSession(true);
+		userSession.invalidate();
+	}
 	
 	/**GETTERS & SETTERS**/
 	public String getEmail() {

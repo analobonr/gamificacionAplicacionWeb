@@ -22,7 +22,7 @@
 		    	</p:menuitem>
 		    
         	
-        	<p:menuitem id="salir" icon="ui-icon-extlink" url="/login.xhtml"/>
+        	<p:menuitem id="salir" icon="ui-icon-extlink" actionListener="#{loginBean.cerrarSesion}" oncomplete="window.location.href ='./login.xhtml'"/>
         	
         	<p:submenu id="menu" label="Menu" >
 	            <p:menuitem value="Buscador de partidas" />
