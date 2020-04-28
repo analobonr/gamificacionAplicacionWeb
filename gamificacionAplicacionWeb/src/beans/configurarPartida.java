@@ -414,13 +414,19 @@ public class configurarPartida implements Serializable {
 			Map<String, String> params = context.getExternalContext().getRequestParameterMap();
 			this.idProfesor = new Integer(params.get("id_profesor"));
 
-			// Guardamos los nombres de los grupos
-			this.equipos.getGrupos().getNombresGrupos().setVariablesJuego(this.nombresGrupos);
-
-			// Convertimos los equipos en un json en string
-			Gson gson = new Gson();
-			String configuracionGE = gson.toJson(this.equipos, ParametrosGE.class);
-			System.out.println(configuracionGE);
+			String configuracionGE = "";
+			
+			
+			//Si tiene configuracion de equipos se obtiene
+			if (this.equipos != null) {
+				// Guardamos los nombres de los grupos
+				this.equipos.getGrupos().getNombresGrupos().setVariablesJuego(this.nombresGrupos);
+	
+				// Convertimos los equipos en un json en string
+				Gson gson = new Gson();
+				configuracionGE = gson.toJson(this.equipos, ParametrosGE.class);
+				System.out.println(configuracionGE);
+			}
 
 			/*
 			 * ConfPartida configuracion = new
@@ -433,7 +439,8 @@ public class configurarPartida implements Serializable {
 			ConfPartida configuracion = new ConfPartida(new Integer(this.configSeleccionada),this.idProfesor, juegoSeleccionado.getIdJuego(), 1, this.titulo,
 					this.etapa, this.curso, this.asignatura, this.tema, this.correctas, "", configuracionGE);
 
-			String confString = gson.toJson(configuracion, ConfPartida.class);
+			Gson gson2 = new Gson();
+			String confString = gson2.toJson(configuracion, ConfPartida.class);
 			System.out.println(confString);
 
 			String url;
