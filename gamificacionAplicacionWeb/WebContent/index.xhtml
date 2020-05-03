@@ -10,6 +10,7 @@
 
 <h:body id="general"> 
 
+	<!-- MENU -->
 	<div id="divTop">   
 	 
 		<h:form>
@@ -51,6 +52,8 @@
 	<div id="contenido">
 		
 		<h:form>  
+		
+			<!-- Datalist de Plantillas -->
 			<div id="panelLeft">
 				<p:dataList id="listaMisPartidas" value="#{partidasBean.misPartidas}" var="misPartidas" type="definition">
 	        		<f:facet id="facetMisPartidas" name="header">
@@ -67,7 +70,10 @@
 	        		<p:panelGrid id="panelGridList" columns="2" styleClass="ui-noborder" layout="grid">
 	        				<p:column id="col1" styleClass="textoIzquierda"><h:outputText value="#{misPartidas.titulo}" /></p:column>
 	        				<p:column id="col2" styleClass="textoDerecha">
-	        					<p:button id="playButton" icon="ui-icon-play" />
+	        					
+	        					<p:commandButton id="playButton" icon="ui-icon-play" actionListener="#{partidasBean.iniciarPartida}">
+	        						<f:param name="partidaID" value="#{misPartidas.id_configuracion}"/>
+	        					</p:commandButton>
 	        					<p:tooltip for="playButton" value="Iniciar partida" position="top"/>
 	        					
 	        					<p:commandButton id="confButton" icon="ui-icon-gear" actionListener="#{configurarPartida.seleccionarConf}" oncomplete="PF('confPartidaDialog').show()" update="confPartidaDialog">
@@ -99,6 +105,8 @@
 			
 			</div>  		
     		
+    		
+    		<!-- Datalist de Partidas en curso -->
 	    	<div id="panelRight" >
 	    		<p:dataList value="#{partidasBean.partidasEnCurso}" var="partidasEnCurso" type="definition"
 			    				 controlsLocation="none" responsive="true">
@@ -127,7 +135,9 @@
      	</h:form>
 	
 	</div>
-		<p:dialog id="confPartidaDialog" modal="true" widgetVar="confPartidaDialog" header="Configuración Partida" closeOnEscape="true" responsive="false"
+	
+	<!-- Dialogo para configuracion de plantillas -->
+	<p:dialog id="confPartidaDialog" modal="true" widgetVar="confPartidaDialog" header="Configuración Partida" closeOnEscape="true" responsive="false"
 				 resizable="true">
         	<h:form>
 		 		<p:wizard flowListener="#{configurarPartida.onFlowProcess}">
@@ -301,7 +311,7 @@
 			 					<p:spinner id="correctas" min="1" value="#{configurarPartida.correctas}"/>
 			 					
 			 					<p:outputLabel for="tiempo" value="Tiempo de respuesta:"/>
-			 					<p:spinner id="tiempo" min="1"/>
+			 					<p:spinner id="tiempo" min="1" value="#{configurarPartida.tiempoRespuesta}"/>
 			                </h:panelGrid>
 			            </p:panel>
 			            

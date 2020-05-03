@@ -59,6 +59,7 @@ public class configurarPartida implements Serializable {
 	private String tema;
 	private Integer fichero;
 	private Integer correctas;
+	private Integer tiempoRespuesta;
 
 	private String email;
 
@@ -92,6 +93,7 @@ public class configurarPartida implements Serializable {
 		this.estiloPanelSelectJuego = visible;
 
 		this.correctas = 50;
+		this.tiempoRespuesta = 10;
 		this.fichero = 1;
 
 	}
@@ -122,7 +124,7 @@ public class configurarPartida implements Serializable {
 
 	}
 
-	private ConfPartida obtenerConfiguracion(String idConf) {
+	public ConfPartida obtenerConfiguracion(String idConf) {
 
 		// Llamada GET al servicio rest correspondiente
 		String url = URLs.GETCONFPARTIDA + idConf;
@@ -437,7 +439,7 @@ public class configurarPartida implements Serializable {
 
 			// Momentaneo
 			ConfPartida configuracion = new ConfPartida(new Integer(this.configSeleccionada),this.idProfesor, juegoSeleccionado.getIdJuego(), 1, this.titulo,
-					this.etapa, this.curso, this.asignatura, this.tema, this.correctas, "", configuracionGE);
+					this.etapa, this.curso, this.asignatura, this.tema, this.correctas, "", configuracionGE,this.tiempoRespuesta);
 
 			Gson gson2 = new Gson();
 			String confString = gson2.toJson(configuracion, ConfPartida.class);
@@ -764,6 +766,14 @@ public class configurarPartida implements Serializable {
 
 	public void setCapturaSrc(String capturaSrc) {
 		this.capturaSrc = capturaSrc;
+	}
+
+	public Integer getTiempoRespuesta() {
+		return tiempoRespuesta;
+	}
+
+	public void setTiempoRespuesta(Integer tiempoRespuesta) {
+		this.tiempoRespuesta = tiempoRespuesta;
 	}
 
 }

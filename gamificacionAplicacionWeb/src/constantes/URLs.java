@@ -25,6 +25,7 @@ public class URLs {
     
     //Partidas
     public static final String LISTPARTIDAS = URL + "partidas/listar/";
+    public static final String NUEVAPARTIDA = URL + "partidas";
     
     //Juegos
     public static final String GETJUEGO = URL + "juegos/";
