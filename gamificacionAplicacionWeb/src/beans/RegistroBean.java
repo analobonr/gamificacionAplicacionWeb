@@ -2,7 +2,6 @@ package beans;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 import java.util.Properties;
 
 import javax.faces.application.FacesMessage;
@@ -27,6 +26,13 @@ import pojos.Estado;
 import pojos.Profesor;
 import constantes.valoresDesplegables.rol_t;
 
+
+/**
+ * Bean para gestionar el registro en la aplicación
+ * @author Ana Lobón
+ * @version: 1.0 (03/05/2020)
+ *
+ */
 @ManagedBean
 public class RegistroBean implements Serializable {
 	
@@ -41,14 +47,14 @@ public class RegistroBean implements Serializable {
 	private rol_t rol = rol_t.USER;
 	private String rolElegido;
 	
-	private List<String> rolesList;
-	
 	
 	//Identifica si se esta gestionando usuarios como superusuario
 	private boolean esSuperusuario = false;
 	
 	
-	/**Registra un nuevo usuario**/
+	/**
+	 * Método que recoge los datos y registra un nuevo usuario
+	 */
 	public void registrar() {
 		
 		//Si el usuario lo esta creando el superusuario
@@ -91,6 +97,12 @@ public class RegistroBean implements Serializable {
 		 }
 	}
 	
+	
+	/**
+	 * Método que realiza la petición POST para crear un nuevo usuario en el sistema
+	 * @param p Datos del profesor a registrar
+	 * @return Estado de la creación del usuario
+	 */
 	public boolean nuevoUsuario(Profesor p) {
 		
 		boolean nuevoUsuario = true;
@@ -123,6 +135,12 @@ public class RegistroBean implements Serializable {
 		 return nuevoUsuario;
 	}
 	
+	
+	
+	/**
+	 * Método que autogenera una nueva contraseña para un usuario
+	 * @param email Correo electrónico del usuario
+	 */
 	public void autogenerarPass(String email) {
 		
 		//Peticion para obtener una nueva password para el usuario
@@ -188,6 +206,10 @@ public class RegistroBean implements Serializable {
 	}
 	
 	
+	
+	/**
+	 * Método que resetea las variables usadas en el formulario de registro
+	 */
 	public void resetear() {
 		nombre = "";
 		apellidos = "";
@@ -199,81 +221,144 @@ public class RegistroBean implements Serializable {
 
 
 	//GETTERS & SETTERS
+	
+	/**
+	 * Método get para el nombre
+	 * @return Nombre del usuario
+	 */
 	public String getNombre() {
 		return nombre;
 	}
 
 
+	/**
+	 * Método set para el nombre del usuario
+	 * @param nombre Nombre del usuario
+	 */
 	public void setNombre(String nombre) {
 		this.nombre = nombre;
 	}
 
 
+	/**
+	 * Método get para los apellidos del usuario
+	 * @return Apellidos del usuario
+	 */
 	public String getApellidos() {
 		return apellidos;
 	}
 
 
+	/**
+	 * Método set para los apellidos del usuario
+	 * @param apellidos Apellidos del usuario
+	 */
 	public void setApellidos(String apellidos) {
 		this.apellidos = apellidos;
 	}
 
 
+	/**
+	 * Método get para el país del usuario
+	 * @return País del usuario
+	 */
 	public String getPais() {
 		return pais;
 	}
 
-
+	/**
+	 * Método set para el país del usuario
+	 * @param pais País del usuario
+	 */
 	public void setPais(String pais) {
 		this.pais = pais;
 	}
 
 
+	/**
+	 * Método get para el correo electrónico del usuario
+	 * @return Correo electrónico del usuario
+	 */
 	public String getEmail() {
 		return email;
 	}
 
-
+	/**
+	 * Método set para el correo electrónico del usuario
+	 * @param email Correo electrónico del usuario
+	 */
 	public void setEmail(String email) {
 		this.email = email;
 	}
 
 
+	/**
+	 * Método get para la contraseña del usuario
+	 * @return Contraseña del usuario
+	 */
 	public String getPassword() {
 		return password;
 	}
 
 
+	/**
+	 * Método set para la contraseña del usuario
+	 * @param password Contraseña del ususario
+	 */
 	public void setPassword(String password) {
 		this.password = password;
 	}
 
 
 
+	/**
+	 * Método que indica si el usuario loggeado es superusuario
+	 * @return Usuario loggeado es superusuario o no
+	 */
 	public boolean isEsSuperusuario() {
 		return esSuperusuario;
 	}
 
+	/**
+	 * Método que establece si el usuario loggeado es superusuario
+	 * @param esSuperusuario Usuario loggeado es superusuario o no
+	 */
 	public void setEsSuperusuario(boolean esSuperusuario) {
 		this.esSuperusuario = esSuperusuario;
 	}
 
 
+	/**
+	 * Método get para el rol del usuario
+	 * @return Rol del usuario (Usuario, Administrador o Superusuario)
+	 */
 	public String getRol() {
 		return rol.toString();
 	}
 
 
+	/**
+	 * Método set para el rol del usuario
+	 * @param rol Rol del usuario
+	 */
 	public void setRol(String rol) {
 		this.rol = rol_t.valueOf(rol);
 	}
 
 
+	/**
+	 * Método get para el rol seleccionado en el formulario de registro
+	 * @return Rol seleccionado en el formulario
+	 */
 	public String getRolElegido() {
 		return rolElegido;
 	}
 
 
+	/**
+	 * Método set para el rol seleccionado en el formulario de registro
+	 * @param rolElegido Rol seleccionado en el formulario
+	 */
 	public void setRolElegido(String rolElegido) {
 		this.rolElegido = rolElegido;
 	}

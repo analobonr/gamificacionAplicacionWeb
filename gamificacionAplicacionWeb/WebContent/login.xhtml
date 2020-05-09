@@ -10,12 +10,20 @@
 </h:head>
 
 <h:body id="loginBody" style="height:500px;">
+
+	<!-- Growl para notificar errores o dar informacion -->
 	<p:growl id="growl" showDetail="true" sticky="true" />
+	
+	<!-- Cabecera -->
 	<p:panel id="panelBar">
 		<h1 id="cabecera" style="color: white;">Aplicación de
 			Administración de Juegos</h1>
+		
+		<!-- Formulario de login -->
 		<h:form>
 			<p:panelGrid styleClass="ui-panelgrid-blank">
+			
+				<!-- Primera fila: Etiquetas de email y contrasena -->
 				<p:row style="color:white;">
 					<p:column>
 						<p:outputLabel value="Email: " />
@@ -25,13 +33,19 @@
 					</p:column>
 				</p:row>
 
+				<!-- Segunda fila -->
 				<p:row style="color:white;">
+				
+					<!-- Inputs de email y contrasena -->
 					<p:column>
 						<p:inputText value="#{loginBean.email}" />
 					</p:column>
 					<p:column>
 						<p:password value="#{loginBean.password}" />
 					</p:column>
+					
+					
+					<!-- Boton de entra y boton para registrarse -->
 					<p:column>
 						<p:commandButton value="Entrar" update="growl"
 							action="#{loginBean.enviarDatos}" />
@@ -41,9 +55,11 @@
 						</p:column>
 					</p:column>
 				</p:row>
+				
+				<!-- Tercera fila: boton para recordar contrasena -->
 				<p:row>
 					<p:column>
-						<p:commandLink value="Recordar contraseña"
+						<p:commandLink value="¿Olvidó su contraseña?"
 							action="#{loginBean.enviarEmail}" update="growl"></p:commandLink>
 					</p:column>
 				</p:row>
@@ -51,7 +67,7 @@
 		</h:form>
 	</p:panel>
 
-
+	<!-- Cuerpo: informacion de interes -->
 	<p:panel id="panelInfo">
 
 		<p>Aplicación de juegos didácticos en el aula es un proyecto que
@@ -98,7 +114,7 @@
 	</p:panel>
 
 
-
+	<!-- Dialogo de registro de nuevo usuario -->
 	<p:dialog id="registro" modal="true" showEffect="fade"
 		hideEffect="fade" widgetVar="registroDialog" header="Registro">
 
