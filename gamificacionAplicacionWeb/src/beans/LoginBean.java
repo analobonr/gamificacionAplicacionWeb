@@ -91,6 +91,9 @@ public class LoginBean implements Serializable {
 				FacesContext context = FacesContext.getCurrentInstance();
 				context.addMessage(null, new FacesMessage(Mensajes.HEADERUPS, Mensajes.ERRORACCESO));
 			}
+		}else {
+			FacesContext contextEx = FacesContext.getCurrentInstance();
+			contextEx.addMessage(null, new FacesMessage(Mensajes.HEADERERROR, Mensajes.ERRORVALIDACIONACCESO));
 		}
 
 	}
