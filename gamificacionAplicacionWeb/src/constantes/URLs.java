@@ -13,7 +13,6 @@ public class URLs {
     
     //Usuarios
     public static final String USUARIO = URL + "usuarios/";
-    public static final String MODUSUARIO = URL + "usuarios/modificar";
     public static final String LISTUSUARIOS = URL + "usuarios/listar/";
 
     //Configuración de partidas

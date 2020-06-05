@@ -111,27 +111,31 @@ public class RegistroBean implements Serializable {
 		 RestTemplate restTemplate = new RestTemplate();
 		 String url = constantes.URLs.USUARIO;
 		 System.out.println(url);
-		 ResponseEntity<Estado> response = restTemplate.postForEntity(url, p, Estado.class);
-		 Estado state = response.getBody();
 		 FacesContext fContext = FacesContext.getCurrentInstance();
-		 
+		 try {
+		 ResponseEntity<Object> response = restTemplate.postForEntity(url, p,null);
+		
 		 //Error
-		 if(!response.getStatusCode().is2xxSuccessful() || !state.isEstado()) {
-			 System.out.println("No se ha podido añadir el profesor");
-			 
+		 if(!response.getStatusCode().is2xxSuccessful()) {
 			fContext.addMessage(null, new FacesMessage("ERROR", "No se ha podido añadir el profesor"));
 			nuevoUsuario = false;
 			
 		//Usuario añadido OK
 		 }else {
-			 System.out.println("Profesor añadido correctamente");
 			 
 			fContext.addMessage(null, new FacesMessage(Mensajes.HEADERNEWUSER, Mensajes.NEWUSER.replace("[MAIL]", email)));
-			 this.resetear();
+			 
 			 RequestContext context = RequestContext.getCurrentInstance();
 			 context.execute("PF('registroDialog').hide();");
 		 }
 		 
+		 }catch(Exception e) {
+			 System.err.println(e);
+			 fContext.addMessage(null, new FacesMessage("ERROR", "No se ha podido añadir el profesor"));
+			nuevoUsuario = false;
+		 }
+		 
+		 this.resetear();
 		 return nuevoUsuario;
 	}
 	

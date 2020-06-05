@@ -8,8 +8,10 @@ public class Mensajes {
 	public static final String HEADERERROR = "¡Error!";
 	public static final String ERRORVALIDACIONACCESO = "Introduzca usuario y contraseña.";
 	public static final String ERRORACCESO = "Usuario o contraseña incorrectos.";
+	public static final String ERRORUSER = "No existe el usuario.";
 	public static final String ERRORREDIRECCION = "Se ha producido un error interno en el acceso";
 	public static final String ERRORNEWPASS = "Se ha producido un error en la autogeneración de la nueva contraseña. Inténtelo de nuevo.";
+	public static final String ERRORENVIOMAIL = "Se ha producido un error en el envío del email con la nueva contraseña. Inténtelo de nuevo";
 	public static final String ERRORNEWPASS2 = "Complete la dirección de correo electrónico para recibir su nueva contraseña.";
 	public static final String ERRORSUBIRZIP = "Debe subir el fichero zip del juego antes de añadirlo.";
 	

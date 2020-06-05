@@ -75,7 +75,7 @@ public class LoginBean implements Serializable {
 					// Iniciamos la sesion del usuario
 					this.iniciarSesion(p);
 
-					//Redirigimos al index (menu principal)
+					//Redirigimos al index (menu principal)-
 					FacesContext contex = FacesContext.getCurrentInstance();
 					try {
 						contex.getExternalContext().redirect(URLs.URLIndex);
@@ -111,6 +111,8 @@ public class LoginBean implements Serializable {
 			String url = constantes.URLs.USUARIO + this.email;
 			
 			RestTemplate restTemplate = new RestTemplate();
+			
+			try {
 			ResponseEntity<Profesor> response = restTemplate.exchange(url, HttpMethod.GET, null,
 					new ParameterizedTypeReference<Profesor>() {
 					});
@@ -166,15 +168,21 @@ public class LoginBean implements Serializable {
 							Mensajes.NEWPASS.replace("[MAIL]", correoReceptor)));
 
 				} catch (MessagingException me) {
-					
+					System.err.println(me);
 					FacesContext context = FacesContext.getCurrentInstance();
-					context.addMessage(null, new FacesMessage(Mensajes.HEADERERROR, Mensajes.ERRORNEWPASS));
+					context.addMessage(null, new FacesMessage(Mensajes.HEADERERROR, Mensajes.ERRORENVIOMAIL));
 				}
+			}
+			}catch(Exception e) {
+				System.err.println(e);
+				FacesContext context = FacesContext.getCurrentInstance();
+				context.addMessage(null, new FacesMessage(Mensajes.HEADERERROR, Mensajes.ERRORUSER));
 			}
 		} else {
 			FacesContext context = FacesContext.getCurrentInstance();
 			context.addMessage(null, new FacesMessage(Mensajes.HEADERERROR, Mensajes.ERRORNEWPASS2));
 		}
+		
 
 	}
 

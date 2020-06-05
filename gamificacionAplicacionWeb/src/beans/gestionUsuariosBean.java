@@ -130,7 +130,7 @@ public class gestionUsuariosBean implements Serializable {
 	public void modificar(Profesor user) {
 		
 
-			String url = constantes.URLs.MODUSUARIO;
+			String url = constantes.URLs.USUARIO;
 			System.out.println("Petición modificar usuario: "+url);
 			RestTemplate restTemplate = new RestTemplate();
 			ResponseEntity<Estado> response = restTemplate.postForEntity(url, user,Estado.class);
