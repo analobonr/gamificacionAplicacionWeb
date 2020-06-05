@@ -25,6 +25,8 @@ import org.springframework.web.client.RestTemplate;
 import constantes.Configuracion;
 import constantes.Mensajes;
 import constantes.URLs;
+import constantes.valoresDesplegables;
+import constantes.valoresDesplegables.rol_t;
 import pojos.Profesor;
 
 /**
@@ -43,6 +45,9 @@ public class LoginBean implements Serializable {
 	private String email;
 	private String password;
 
+	//Propiedad que recoge los datos del profesor logeado
+	private Profesor p;
+	private String rolUsuario = "";
 
 	/**
 	 * Método que procesa el login
@@ -74,6 +79,13 @@ public class LoginBean implements Serializable {
 					
 					// Iniciamos la sesion del usuario
 					this.iniciarSesion(p);
+					
+					//Asignamos el rol para mostrar en la pantalla de inicio
+					if (p.getRol() != rol_t.USER) {
+						this.setRolUsuario(valoresDesplegables.rolesMap.get(p.getRol()));
+					}else {
+						this.setRolUsuario("");
+					}
 
 					//Redirigimos al index (menu principal)-
 					FacesContext contex = FacesContext.getCurrentInstance();
@@ -201,11 +213,12 @@ public class LoginBean implements Serializable {
 	 * Método que inicia una sesión para el usuario
 	 * @param p Profesor
 	 */
-	public void iniciarSesion(Profesor p) {
+	public void iniciarSesion(Profesor profesor) {
+		this.p = profesor;
 		HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance()
 				.getExternalContext().getRequest();
 		HttpSession userSession = request.getSession(true);
-		userSession.setAttribute("profesor", p);
+		userSession.setAttribute("profesor", profesor);
 	}
 
 	// GETTERS & SETTERS
@@ -245,6 +258,33 @@ public class LoginBean implements Serializable {
 	 */
 	public void setPassword(String password) {
 		this.password = password;
+	}
+	
+	
+	/**
+	 * Devuelve el profesor de loggeado
+	 * @return Profesor
+	 */
+	public Profesor getP() {
+		return p;
+	}
+
+
+	/**
+	 * Devuelve el rol del usuario loggeado
+	 * @return Rol del usuario
+	 */
+	public String getRolUsuario() {
+		return rolUsuario;
+	}
+
+
+	/**
+	 * Asigna el rol del usuario loggeado
+	 * @param rolUsuario Rol del usuario
+	 */
+	public void setRolUsuario(String rolUsuario) {
+		this.rolUsuario = rolUsuario;
 	}
 
 }
