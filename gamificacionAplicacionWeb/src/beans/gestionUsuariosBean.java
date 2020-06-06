@@ -1,5 +1,6 @@
 package beans;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
@@ -81,9 +82,6 @@ public class gestionUsuariosBean implements Serializable {
 	
 	public void eliminarProfesor() {
 		
-		
-		System.out.println(this.selectedUsers.size());
-		
 		if (this.selectedUsers.size() > 0) {
 			
 			//Creamos la lista de ids a eliminar
@@ -93,15 +91,20 @@ public class gestionUsuariosBean implements Serializable {
 				idsEliminar.add(p.getId());
 			}
 			
-			//Realizamos la llamada Rest
+			try {
+			//Realizamos la peticion Rest
 			String url = URLs.USUARIO;
 			System.out.println("Petición eliminar usuarios: "+url);
 			RestTemplate restTemplate = new RestTemplate();
-			ResponseEntity<Estado> response = restTemplate.exchange(
-			  url ,HttpMethod.DELETE, new HttpEntity<List<Integer>>(idsEliminar), new ParameterizedTypeReference<Estado>(){});
-			
+			ResponseEntity<Object> response = restTemplate.exchange(
+			  url ,HttpMethod.DELETE, new HttpEntity<List<Integer>>(idsEliminar), new ParameterizedTypeReference<Object>(){});
 			
 			System.out.println("Status: "+response.getStatusCodeValue());
+			}catch(Exception e) {
+				System.err.println(e);
+			}
+			
+			
 			
 		}
 		
