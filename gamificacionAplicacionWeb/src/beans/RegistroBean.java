@@ -22,7 +22,6 @@ import org.springframework.web.client.RestTemplate;
 
 import constantes.Mensajes;
 import constantes.URLs;
-import pojos.Estado;
 import pojos.Profesor;
 import constantes.valoresDesplegables.rol_t;
 

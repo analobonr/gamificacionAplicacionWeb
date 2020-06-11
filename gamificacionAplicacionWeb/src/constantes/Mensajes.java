@@ -9,6 +9,7 @@ public class Mensajes {
 	public static final String ERRORVALIDACIONACCESO = "Introduzca usuario y contraseña.";
 	public static final String ERRORACCESO = "Usuario o contraseña incorrectos.";
 	public static final String ERRORUSER = "No existe el usuario.";
+	public static final String ERROREDITUSER = "Error interno al modificar el usuario.";
 	public static final String ERRORDELETEUSER = "Error interno al eliminar el/los usuario/s.";
 	public static final String ERRORNEWUSER = "No se ha podido crear el usuario";
 	public static final String ERRORREDIRECCION = "Se ha producido un error interno en el acceso";

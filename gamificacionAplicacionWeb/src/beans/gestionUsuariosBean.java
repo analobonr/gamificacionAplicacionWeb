@@ -28,23 +28,41 @@ import constantes.valoresDesplegables.rol_t;
 import pojos.Estado;
 import pojos.Profesor;
 
-/*Bean que maneja los datos de partidaForm para la configuración de una partida*/
 
+
+/**
+ * Bean para el manejo de la interfaz de gestion de usuarios
+ * @author Ana Lobón
+ * @version: 1.0 (03/05/2020)
+ */
 @ManagedBean
 public class gestionUsuariosBean implements Serializable {
 	
 	private static final long serialVersionUID = 3885381981170292304L;
 	
-	
+	//Listado completo de usuarios
 	private List<Profesor> users;
+	
+	//Listado de usuarios filtrados
 	private List<Profesor> filteredUsers;
+	
+	//Usuario seleccionado para edicion
 	private Profesor selectedUser;
+	
+	//Listado de usuarios seleccionados para borrado
 	private List<Profesor> selectedUsers;
 	
+	
+	//Usuario loggeado
 	private Profesor login;
 	
+	
+	/**
+	 * Método que se ejecuta automaticamente cuando carga la interfaz
+	 */
 	@PostConstruct
     public void init() {
+		
 		//Obtenemos la session del usuario
 		HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
 		HttpSession userSession = request.getSession(true);
@@ -52,27 +70,31 @@ public class gestionUsuariosBean implements Serializable {
 		
 		ExternalContext eContext = FacesContext.getCurrentInstance().getExternalContext();
 
+		//Si el usuario loggeado no tiene rol de superusuario
 		if((login == null) || (login.getRol() != rol_t.SUPER)) {
+			
 			try{
-				
+				//Redireccionamos
 	            eContext.redirect( eContext.getRequestContextPath() + URLs.pathlogin );
 			}catch(  Exception e ){
-				System.out.println( "Me voy al carajo, no funciona esta redireccion" );
-				
+				System.err.println(e);
 			}
 			
 		}else {
+			
         //Obtenemos la lista de usuarios
 			this.users = this.listarProfesores();
 		}
     }
 	
+	/**
+	 * Método que realiza la peticion GET para obtener el listado de profesores registrados
+	 * @return Lista de profesores registrados
+	 */
 	public List<Profesor> listarProfesores(){
 		
-		
-		
+
 		String url = URLs.LISTUSUARIOS;
-		System.out.println("Petición de lista de usuarios: "+url);
 		RestTemplate restTemplate = new RestTemplate();
 		ResponseEntity<List<Profesor>> response = restTemplate.exchange(
 		  url ,HttpMethod.GET, null, new ParameterizedTypeReference<List<Profesor>>(){});
@@ -82,6 +104,10 @@ public class gestionUsuariosBean implements Serializable {
 	
 	}
 	
+	
+	/**
+	 * 
+	 */
 	public void eliminarProfesor() {
 		
 		if (this.selectedUsers.size() > 0) {
@@ -134,25 +160,31 @@ public class gestionUsuariosBean implements Serializable {
 		}*/
 	}
 	
+	/**
+	 * Método que realiza la petición PUT para modificar un usuario
+	 * @param user Objeto con el usuario a modificar
+	 */
 	public void modificar(Profesor user) {
 		
-
-			String url = constantes.URLs.USUARIO;
-			System.out.println("Petición modificar usuario: "+url);
-			RestTemplate restTemplate = new RestTemplate();
-			ResponseEntity<Estado> response = restTemplate.postForEntity(url, user,Estado.class);
-			
-			System.out.println(response.getStatusCode());
-			if (response.getStatusCode().is2xxSuccessful()) {
-				try{
-		            FacesContext contex = FacesContext.getCurrentInstance();
-		            contex.getExternalContext().redirect( URLs.URLGestUsuarios );
-				}catch(  Exception e ){
-					System.err.println( "Error al redireccionar a: " + URLs.URLGestUsuarios );
-					System.err.println(e.getMessage());
-				}
+			try {
 				
+				//Petición PUT para modificar el usuario
+				String url = constantes.URLs.USUARIO;
+				RestTemplate restTemplate = new RestTemplate();
+				restTemplate.put(url, user);
+				
+				//Recargamos la interfaz de gestion de usuarios
+				FacesContext contex = FacesContext.getCurrentInstance();
+	            contex.getExternalContext().redirect( URLs.URLGestUsuarios );
+		
+	        //Capturamos los errores
+			}catch(Exception e){
+				System.err.println(e.getMessage());
+				FacesContext context = FacesContext.getCurrentInstance();
+				context.addMessage(null, new FacesMessage(Mensajes.HEADERERROR,  Mensajes.ERROREDITUSER));
 			}
+				
+			
 	}
 	
 	//Getters and Setters
