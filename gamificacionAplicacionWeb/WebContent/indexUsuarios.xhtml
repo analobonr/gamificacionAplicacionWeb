@@ -57,16 +57,16 @@
 
 	<div id="contenido">
 
-		<p:growl id="growl" showDetail="true" sticky="true" /> 
+		
 	
 		<!-- Contenido principal -->
 		<h:form id="formTabla">
-		
+			<p:growl id="growl" showDetail="true" sticky="true" life="5000"/> 
 			<div style="display: flow-root;">
 			
 				<!-- Boton eliminar usuarios -->
 				<p:commandButton id="deleteUsers" process="@this formTabla:tabla"
-					update="formTabla:tabla" icon="ui-icon-trash"
+					update="@form" icon="ui-icon-trash"
 					actionListener="#{gestionUsuariosBean.eliminarProfesor()}"
 					ajax="true" style="float: right;">
 					

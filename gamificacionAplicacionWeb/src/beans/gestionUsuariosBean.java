@@ -8,6 +8,7 @@ import java.util.ArrayList;
 
 import javax.annotation.ManagedBean;
 import javax.annotation.PostConstruct;
+import javax.faces.application.FacesMessage;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
@@ -20,6 +21,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+import constantes.Mensajes;
 import constantes.URLs;
 import constantes.valoresDesplegables;
 import constantes.valoresDesplegables.rol_t;
@@ -102,6 +104,8 @@ public class gestionUsuariosBean implements Serializable {
 			System.out.println("Status: "+response.getStatusCodeValue());
 			}catch(Exception e) {
 				System.err.println(e);
+				FacesContext context = FacesContext.getCurrentInstance();
+				context.addMessage(null, new FacesMessage(Mensajes.HEADERERROR,  Mensajes.ERRORDELETEUSER));
 			}
 			
 			

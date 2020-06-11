@@ -9,6 +9,8 @@ public class Mensajes {
 	public static final String ERRORVALIDACIONACCESO = "Introduzca usuario y contraseña.";
 	public static final String ERRORACCESO = "Usuario o contraseña incorrectos.";
 	public static final String ERRORUSER = "No existe el usuario.";
+	public static final String ERRORDELETEUSER = "Error interno al eliminar el/los usuario/s.";
+	public static final String ERRORNEWUSER = "No se ha podido crear el usuario";
 	public static final String ERRORREDIRECCION = "Se ha producido un error interno en el acceso";
 	public static final String ERRORNEWPASS = "Se ha producido un error en la autogeneración de la nueva contraseña. Inténtelo de nuevo.";
 	public static final String ERRORENVIOMAIL = "Se ha producido un error en el envío del email con la nueva contraseña. Inténtelo de nuevo";
@@ -22,7 +24,7 @@ public class Mensajes {
 	public static final String NEWUSER = "Su usuario [MAIL] ha sido registrado correctamente.";
 	
 	//Mensajes para el Mail
-	public static final String ASUNTOMAIL = "ADJA: Nuevo acceso";
+	public static final String ASUNTOMAIL = "AJDAA: Nuevo acceso";
 	public static final String MENSAJEMAIL = "Buenas, \nSu nueva contraseña para acceder a nuestra plataforma es: [NEWPASS]\nEsperamos que disfrute la experiencia. \nUn saludo.";
 
 }
