@@ -1,8 +1,6 @@
 package beans;
 
-import java.io.IOException;
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -14,7 +12,6 @@ import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.primefaces.context.RequestContext;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -25,7 +22,6 @@ import constantes.Mensajes;
 import constantes.URLs;
 import constantes.valoresDesplegables;
 import constantes.valoresDesplegables.rol_t;
-import pojos.Estado;
 import pojos.Profesor;
 
 
@@ -106,59 +102,38 @@ public class gestionUsuariosBean implements Serializable {
 	
 	
 	/**
-	 * 
+	 * Realiza la peticion DELETE para eliminar un listado de usuarios
 	 */
 	public void eliminarProfesor() {
 		
+		//Comprobamos que se haya seleccionado algun usuario
 		if (this.selectedUsers.size() > 0) {
 			
 			//Creamos la lista de ids a eliminar
 			List<Integer> idsEliminar = new ArrayList<Integer>();
 			for (Profesor p : this.selectedUsers) {
-				System.out.println(p.getId() + ": "+p.getEmail());
 				idsEliminar.add(p.getId());
 			}
 			
 			try {
-			//Realizamos la peticion Rest
-			String url = URLs.USUARIO;
-			System.out.println("Petición eliminar usuarios: "+url);
-			RestTemplate restTemplate = new RestTemplate();
-			ResponseEntity<Object> response = restTemplate.exchange(
-			  url ,HttpMethod.DELETE, new HttpEntity<List<Integer>>(idsEliminar), new ParameterizedTypeReference<Object>(){});
-			
-			System.out.println("Status: "+response.getStatusCodeValue());
+				//Realizamos la peticion Rest DELETE
+				String url = URLs.USUARIO;
+				RestTemplate restTemplate = new RestTemplate();
+				restTemplate.exchange(
+				  url ,HttpMethod.DELETE, new HttpEntity<List<Integer>>(idsEliminar), new ParameterizedTypeReference<Object>(){});
+				
+				//Recargamos la interfaz de gestion de usuarios
+				FacesContext contex = FacesContext.getCurrentInstance();
+	            contex.getExternalContext().redirect( URLs.URLGestUsuarios );
+			//Capturamos los errores
 			}catch(Exception e) {
 				System.err.println(e);
 				FacesContext context = FacesContext.getCurrentInstance();
 				context.addMessage(null, new FacesMessage(Mensajes.HEADERERROR,  Mensajes.ERRORDELETEUSER));
 			}
-			
-			
-			
 		}
-		
-		
-		
-		
-		/*if (p != null) {
-			String url = URLs.USUARIO + p.getEmail();
-			System.out.println("Petición eliminar usuario: "+url);
-			RestTemplate restTemplate = new RestTemplate();
-			ResponseEntity<Estado> response = restTemplate.exchange(
-			  url ,HttpMethod.DELETE, null, new ParameterizedTypeReference<Estado>(){});
-			
-			
-			//PARCHE
-			try{
-	            FacesContext contex = FacesContext.getCurrentInstance();
-	            contex.getExternalContext().redirect( URLs.URLGestUsuarios );
-			}catch(  Exception e ){
-				System.err.println( "Error al redireccionar a: " + URLs.URLGestUsuarios );
-				System.err.println(e.getMessage());
-			}
-		}*/
 	}
+	
 	
 	/**
 	 * Método que realiza la petición PUT para modificar un usuario
@@ -188,39 +163,76 @@ public class gestionUsuariosBean implements Serializable {
 	}
 	
 	//Getters and Setters
+	/**
+	 * Getter de los usuarios registrados
+	 * @return Listado usuarios registrados
+	 */
 	public List<Profesor> getUsers() {
 		return users;
 	}
 
+	/**
+	 * Setter de los usuarios registrados
+	 * @param users Listado de usuarios registrado
+	 */
 	public void setUsers(List<Profesor> users) {
 		this.users = users;
 	}
 
+	/**
+	 * Getter de los usuarios filtrados
+	 * @return Listado de usuarios filtrados
+	 */
 	public List<Profesor> getFilteredUsers() {
 		return filteredUsers;
 	}
 
+	/**
+	 * Setter de los usuarios filtrados
+	 * @param filteredUsers Listado de usuarios filtrados
+	 */
 	public void setFilteredUsers(List<Profesor> filteredUsers) {
 		this.filteredUsers = filteredUsers;
 	}
 
+	
+	/**
+	 * Getter del usuario seleccionado para editar
+	 * @return Usuario
+	 */
 	public Profesor getSelectedUser() {
 		return selectedUser;
 	}
 
+	/**
+	 * Setter del usuario seleccionado para editar
+	 * @param selectedUser Usuario
+	 */
 	public void setSelectedUser(Profesor selectedUser) {
 		this.selectedUser = selectedUser;
 	}
 	
+	/**
+	 * Getter del listado de roles
+	 * @return Listado de roles
+	 */
 	public List<String> getRolesList() {
 		return valoresDesplegables.rolesList;
 		
     }
 
+	/**
+	 * Getter de los usuarios seleccionados
+	 * @return Listado de usuarios
+	 */
 	public List<Profesor> getSelectedUsers() {
 		return selectedUsers;
 	}
 
+	/**
+	 * Setter de los usuarios seleccionados
+	 * @param selectedUsers Listado de usuarios
+	 */
 	public void setSelectedUsers(List<Profesor> selectedUsers) {
 		this.selectedUsers = selectedUsers;
 	}
