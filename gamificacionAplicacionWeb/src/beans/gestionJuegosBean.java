@@ -409,44 +409,71 @@ public class gestionJuegosBean implements Serializable {
 			e.printStackTrace();
 		}
 	}
+	
+	
+	/**
+	 * Método que realiza la petición PUT para modificar un juego
+	 */
 	public void modificar() {
-		
+	
+		//Establecemos la etapa y tipo de respuesta correspondiente
 		this.juegoform.setEtapa(this.etapasToString());
 		this.juegoform.setTipoRespuesta(Integer.parseInt(tipoRespuesta));		
 
 		
-		String url = URLs.MODJUEGO;
-		System.out.println("Petición de modificar juego: " + url);
-		RestTemplate restTemplate = new RestTemplate();
-		ResponseEntity<Estado> response = restTemplate.postForEntity(url, this.juegoform, Estado.class);
-
-		if (response.getBody().isEstado()) {
-			System.out.println("Juego modificado correctamente");
-		} else {
-			System.out.println("Juego modificado fail");
-
+		try {
+			
+			//Petición PUT para modificar el usuario
+			String url = constantes.URLs.GETJUEGO;
+			RestTemplate restTemplate = new RestTemplate();
+			restTemplate.put(url, this.juegoform);
+			
+			//Listamos los juegos
+			this.juegosFiltrados = listarJuegos();
+			this.fieldLegend = this.juegoform.getNombre();
+			
+	
+        //Capturamos los errores
+		}catch(Exception e){
+			System.err.println(e.getMessage());
+			FacesContext context = FacesContext.getCurrentInstance();
+			context.addMessage(null, new FacesMessage(Mensajes.HEADERERROR, Mensajes.ERROREDITJUEGO ));
 		}
-		
-		this.juegosFiltrados = listarJuegos();
-		this.fieldLegend = this.juegoform.getNombre();
-
 	}
+
 	
+/**
+ * Metodo que realiza la petición DELETE para eliminar un juego
+ */
 public void eliminar() {
+
+		try {
+			
+			//Realizamos la petición DELETE
+			String url = URLs.GETJUEGO + this.juegoform.getId_juego() ;
+			RestTemplate restTemplate = new RestTemplate();
+			restTemplate.delete(url);
+			
+			
+			//Listamos los juegos y reseteamos el formulario
+			this.juegosFiltrados = listarJuegos();
+			this.resetForm();
 		
-		String url = URLs.GETJUEGO + this.juegoform.getId_juego() ;
-		System.out.println("Petición de elimnar juego: " + url);
-		RestTemplate restTemplate = new RestTemplate();
-		restTemplate.delete(url);
-		
-		this.juegosFiltrados = listarJuegos();
-		this.fieldLegend = this.juegoform.getNombre();
+		//Capturamos los errores
+		}catch(Exception e) {
+			System.err.println(e);
+			FacesContext context = FacesContext.getCurrentInstance();
+			context.addMessage(null, new FacesMessage(Mensajes.HEADERERROR,  Mensajes.ERRORDELETEJUEGO));
+		}
 
 	}
 
 	
 	
-
+	/**
+	 * Listener de seleccionar juego. Inicializa las variables para mostrar el juego seleccionado
+	 * @param event Evento que contiene el juego a mostrar
+	 */
 	public void onSelectJuego(SelectEvent event) {
 
 		this.juegoform = (Juego) event.getObject();		
