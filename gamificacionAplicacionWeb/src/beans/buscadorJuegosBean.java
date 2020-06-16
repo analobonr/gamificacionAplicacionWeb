@@ -215,7 +215,7 @@ private boolean existsFormaRespuesta(String[] respuestasFiltro, int tipoRespuest
         }
 		
         for (Juego juego : juegos){
-            if (id.equals(juego.getIdJuego())){
+            if (id.equals(juego.getId_juego())){
                 return juego;
             }
         }

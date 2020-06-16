@@ -191,7 +191,7 @@ public class configurarPartida implements Serializable {
 		String configuracionEquipos = this.juegoSeleccionado.getJsonEquipos();
 		if (this.configSeleccionada != "-1") {
 			ConfPartida cp = this.obtenerConfiguracion(this.configSeleccionada);
-			if (cp.getId_juego() == this.juegoSeleccionado.getIdJuego()) {
+			if (cp.getId_juego() == this.juegoSeleccionado.getId_juego()) {
 				configuracionEquipos = cp.getEquipos();
 				cargarConfiguracion = true;
 			}
@@ -438,7 +438,7 @@ public class configurarPartida implements Serializable {
 			 */
 
 			// Momentaneo
-			ConfPartida configuracion = new ConfPartida(new Integer(this.configSeleccionada),this.idProfesor, juegoSeleccionado.getIdJuego(), 1, this.titulo,
+			ConfPartida configuracion = new ConfPartida(new Integer(this.configSeleccionada),this.idProfesor, juegoSeleccionado.getId_juego(), 1, this.titulo,
 					this.etapa, this.curso, this.asignatura, this.tema, this.correctas, "", configuracionGE,this.tiempoRespuesta);
 
 			Gson gson2 = new Gson();
@@ -585,7 +585,7 @@ public class configurarPartida implements Serializable {
 		}
 
 		for (Juego juego : juegos) {
-			if (id.equals(juego.getIdJuego())) {
+			if (id.equals(juego.getId_juego())) {
 				return juego;
 			}
 		}

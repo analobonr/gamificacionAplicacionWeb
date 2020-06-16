@@ -35,7 +35,7 @@ public class addJuego implements Serializable{
     public void init() {
 		
 		setNuevoJuego(new Juego());		
-		nuevoJuego.setIdJuego(-1);
+		nuevoJuego.setId_juego(-1);
 		nuevoJuego.setPregMin(1);
 		nuevoJuego.setNumFichMin(1);
 		nuevoJuego.setNumFichMax(1);

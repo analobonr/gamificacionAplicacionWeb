@@ -30,7 +30,7 @@ public class JuegoConverter implements Converter {
     	String s = "";
     	
     	if (juego != null) {
-    		s = String.valueOf(((Juego) juego).getIdJuego());
+    		s = String.valueOf(((Juego) juego).getId_juego());
     	}
     	
     	return s;

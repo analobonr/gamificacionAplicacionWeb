@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -42,8 +43,12 @@ import pojos.configuracionEquipos.ParametrosGE;
 import constantes.valoresDesplegables.estilosJuego_t;
 import constantes.valoresDesplegables.rol_t;
 
-/*Bean que maneja los datos de partidaForm para la configuración de una partida*/
 
+/**
+ * Bean que maneja los datos de la interfaz de gestión de juegos
+ * @author Ana Lobón
+ * @version 1.0 (14/06/2020)
+ */
 @ManagedBean
 public class gestionJuegosBean implements Serializable {
 
@@ -80,8 +85,12 @@ public class gestionJuegosBean implements Serializable {
 	private boolean verModificar;
 	private String fieldLegend;
 	
+	//Flag que indica si hay un fichero de juego cargado
 	private boolean ficheroSubido;
 
+	/**
+	 * Método que se ejecuta automaticamente cuando carga la interfaz
+	 */
 	@PostConstruct
 	public void init() {
 		
@@ -91,105 +100,229 @@ public class gestionJuegosBean implements Serializable {
 		login = (Profesor) userSession.getAttribute("profesor");
 		
 		ExternalContext eContext = FacesContext.getCurrentInstance().getExternalContext();
-
+		
+		//Si el usuario loggeado no tiene rol de superusuario
 		if((login == null) || (login.getRol() == rol_t.USER)) {
 			try{
-				
+				//Redireccionamos a la interfaz de login
 	            eContext.redirect( eContext.getRequestContextPath() + URLs.pathlogin );
 			}catch(  Exception e ){
-				System.out.println( "Me voy al carajo, no funciona esta redireccion" );
-				
+				System.err.println(e);				
 			}
 			
+		//Si no...
 		}else {
+			//Inicializamos el objeto Juego para el formulario
 			this.juegoform = new Juego();
+			this.juegoform.setNumFichMin(0);
+			this.juegoform.setNumFichMax(0);
+			this.juegoform.setPregMin(0);
+			
+			//Obtenemos el listado de juegos existentes
 			this.juegosListadoCompleto = this.listarJuegos();
 			this.juegosFiltrados = this.juegosListadoCompleto;
+			
+			//Inicializamos para vista inicial
 			this.verModificar = false;
 			this.fieldLegend = "Nuevo Juego";
 			this.ficheroSubido = false;
 		}
 	}
 
+	/**
+	 * Realiza la petición get para obtener el listado de juegos
+	 * @return Listado de juegos existentes
+	 */
+	public List<Juego> listarJuegos() {
+		
+		List<Juego> lista = new ArrayList<Juego>();
+		
+		try {
+			String url = URLs.GETJUEGO;
+			RestTemplate restTemplate = new RestTemplate();
+			ResponseEntity<List<Juego>> response = restTemplate.exchange(
+					url ,HttpMethod.GET, null, new ParameterizedTypeReference<List<Juego>>(){});
+			
+			if (response.getStatusCode().is2xxSuccessful()) {
+				lista = response.getBody();
+			}
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		return lista;
+		
+	}
+	
+	/**
+	 * Listener que gestiona la subida de un zip de juego
+	 * @param event Contiene los datos del evento (incluye el archivo)
+	 */
+	public void handleFileUpload(FileUploadEvent event) {
+	  
+		//Obtenemos el archivo
+		UploadedFile fichero = event.getFile();
+		
+		//Asignamos el nombre y la ruta donde se guardara el zip
+		this.juegoform.setNombreZip(fichero.getFileName().split(".zip")[0]);
+		this.juegoform.setRutaZip(Rutas.rutaZip);
+		
+	    try {
+	    	//Guardamos el zip en la ruta correspondiente
+	    	fichero.write(Rutas.rutaZip + fichero.getFileName());
+	    	this.ficheroSubido = true;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_ERROR,Mensajes.HEADERERROR, Mensajes.ERRORGUARDARZIP);
+	        FacesContext.getCurrentInstance().addMessage(null, message);
+		}
+	}
+	
+	/**
+	 * Metodo que elimina el zip subido y prepara las variables para poder subir uno nuevo
+	 */
+	public void cambiarZip() {
+		
+		//Borramos el zip
+		File zip = new File(this.juegoform.getRutaZip()+this.juegoform.getNombreZip()+".zip");
+		zip.delete();
+		
+		//Reseteamos las variables
+		this.ficheroSubido = false;
+		this.juegoform.setRutaZip("");
+		this.juegoform.setNombreZip("");
+
+	}
+	
+	
+	/**
+	 * Valida los datos introducidos y añade un nuevo juego
+	 */
 	public void add() {
 	
 		//Comprobamos si se ha subido el zip del juego
-		
 		if (this.ficheroSubido) {
 		
-			this.juegoform.setIdJuego(-1);
+			//Preparamos el juego
+			this.juegoform.setId_juego(-1);
 			this.juegoform.setEtapa(this.etapasToString());
 			this.juegoform.setTipoRespuesta(Integer.parseInt(tipoRespuesta));	
 			this.juegoform.setEstiloJuego(estilosJuego_t.valueOf(this.estiloJuego));
 			
-			Gson gson = new Gson();
-			String juegoString = gson.toJson(this.juegoform);
-			System.out.println("juegoString: "+juegoString);
-		
-			//Registramos el juego
-			String url = URLs.GETJUEGO;
-			System.out.println("Petición de añadir juego: " + url);
-			RestTemplate restTemplate = new RestTemplate();
-			ResponseEntity<Estado> response = restTemplate.postForEntity(url, this.juegoform, Estado.class);
-	
-			//Si se registro OK
-			if (response.getBody().isEstado()) {
-				System.out.println("Juego añadido correctamente");
+			//Petición post para añadir el juego
+			boolean error = this.postJuego(this.juegoform);
+				
+			//Si se produce error
+			if (error) {
+				
+				FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_ERROR,Mensajes.HEADERERROR, Mensajes.ERRORADDJUEGO);
+	            FacesContext.getCurrentInstance().addMessage(null, message);
+				
+			//Si se añade correctamente
+			} else {
 				
 				//Descomprimimos el fichero
 				this.descomprimirZip(this.juegoform.getRutaZip(), this.juegoform.getNombreZip());
 				//Copiamos la portada y la captura en la carpeta del despligue
 				this.despliegueImagenes(this.juegoform.getNombreZip(), this.juegoform.getRutaZip());
 				
-			//Si el registro no OK
-			} else {
-				System.out.println("Juego añadido fail");
 				
-				//Eliminamos el zip
-				File zip = new File(this.juegoform.getRutaZip()+this.juegoform.getNombreZip());
-				
-				if(zip.delete()) {
-					System.out.println("Archivo eliminado");
-				}else {
-					System.out.println("Error al eliminar el archivo");
-				}
+				//Reseteamos el formulario y actualizamos el listado de juegos
+				this.resetForm();
+				this.juegosFiltrados = listarJuegos();
 	
 			}
-			this.resetForm();
-			this.juegosFiltrados = listarJuegos();
+			
+			
+			//Eliminamos el zip
+			File zip = new File(this.juegoform.getRutaZip()+this.juegoform.getNombreZip()+".zip");
+			zip.delete();
+		
+			
 		}else {
 			FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_ERROR,Mensajes.HEADERERROR, Mensajes.ERRORSUBIRZIP);
             FacesContext.getCurrentInstance().addMessage(null, message);
 		}
 
-
-
-		
-
 	}
 	
+	/**
+	 * Realiza la petición post para añadir un juego
+	 * @param juego Juego a añadir
+	 * @return Devuelve 1 si se produce error o 0 si el juego se añade correctamente
+	 */
+	private boolean postJuego(Juego juego) {
+		
+		boolean error = false;
+		
+		try {
+			//Registramos el juego
+			String url = URLs.GETJUEGO;
+			RestTemplate restTemplate = new RestTemplate();
+			ResponseEntity<Object> response = restTemplate.postForEntity(url, juego,null);
+			
+			if (!response.getStatusCode().is2xxSuccessful()) {
+				error = true;
+			}
+		}catch(Exception e) {
+			e.printStackTrace();
+			error = true;
+		}
+		
+		
+		return error;
+		
+	}
+	
+	/**
+	 * Metodo que reseta el formulario dejandolo vacio para poder añadir un nuevo juego
+	 */
+	public void resetForm() {
+		
+        this.juegoform = new Juego();
+        this.setEtapasSeleccionadas(null);
+        this.setTipoRespuesta("0");
+        this.juegoform.setNumFichMin(0);
+		this.juegoform.setNumFichMax(0);
+		this.juegoform.setPregMin(0);
+        this.verModificar = false;
+        this.fieldLegend = "Nuevo Juego";
+        this.ficheroSubido = false;
+    }
+	
+	
+	/**
+	 * Método que descomprime el zip del juego
+	 * @param ruta Ruta donde se encuentra el zip
+	 * @param nombre Nombre del fichero .zip
+	 */
 	public void descomprimirZip(String ruta,String nombre) {
 		
 
-		//crea un buffer temporal para el archivo que se va descomprimir
+		//Se crea un buffer temporal para el archivo que se va descomprimir
 		ZipInputStream zis;
 		try {
 			zis = new ZipInputStream(new FileInputStream(ruta + nombre + ".zip"));
 			
 			ZipEntry salida;
 			
-			//recorre todo el buffer extrayendo uno a uno cada archivo del zup y 
+			//Se recorre todo el buffer extrayendo uno a uno cada archivo del zip y 
 			//creándolos de nuevo en su archivo original 
 			try {
-				while (null != (salida = zis.getNextEntry())) {
+				while (null != (salida = zis.getNextEntry())) { 
 					
-					
+					//Si es un directorio...
 					if (salida.isDirectory()) {
-						System.out.println("Nombre del directorio: "+salida.getName());	
+						//Se crea
 			            File directorio = new File(ruta + salida.getName());
 			            directorio.mkdir();
+			            
+			        //Si no.. es un fichero
 			        }else {
-			        	System.out.println("Nombre del Archivo: "+salida.getName());	
+			        	
+			        	//Se guarda
 						FileOutputStream fos = new FileOutputStream(ruta + salida.getName());
 						int leer;
 						byte[] buffer = new byte[1024];
@@ -208,46 +341,52 @@ public class gestionJuegosBean implements Serializable {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-
-		
-	
 	}
 	
-	public void cambiarZip() {
-		this.ficheroSubido = false;
-		this.juegoform.setRutaZip("");
-		this.juegoform.setNombreZip("");
-		File zip = new File(this.juegoform.getRutaZip()+this.juegoform.getNombreZip());
-		zip.delete();
-	}
 	
+	
+	/**
+	 * Método que despliega las imagenes en el directorio web content de la aplicacion
+	 * @param nombreJuego Nombre del juego
+	 * @param rutaOrigen Ubicación del juego
+	 */
 	public void despliegueImagenes(String nombreJuego, String rutaOrigen) {
 		
-	
-		System.out.println(rutaOrigen+nombreJuego+"/"+Rutas.rutaOrigenImagenes);
+		//Creamos los ficheros con las imagenes de caratura y capturas del juego
 		String ruta = rutaOrigen+nombreJuego+"/"+Rutas.rutaOrigenImagenes;
 		String nombrePortada = nombreJuego.split("jug-")[1]+".png";
 		String nombreCaptura = nombreJuego.split("jug-")[1]+"-cap.jpg";
 		File portada = new File(ruta+nombrePortada);
 		File captura = new File(ruta+nombreCaptura);
-		
+
 		if (portada.isFile()) {
+			
+			//Fichero de destino de la portada
 			File portadaDestino = new File(Rutas.rutaDestinoImagenes+nombrePortada);
 			
+			//Copiamos la portada en el destino
 			this.copiarFicheros(portada, portadaDestino);
-			System.out.println("Portada copiada a: "+Rutas.rutaDestinoImagenes+nombrePortada);
 		}
 		    
 	    if (captura.isFile()) {
+	    	
+	    	//Fichero de destino de la captura
 			File capturaDestino = new File(Rutas.rutaDestinoImagenes+nombreCaptura);
+			
+			//Copiamos la captura en el destino
 			this.copiarFicheros(captura, capturaDestino);
-			System.out.println("Captura copiada a: "+Rutas.rutaDestinoImagenes+nombreCaptura);
 		
 	    } 
 		    
 		
 	}
 	
+	
+	/**
+	 * Metodo auxiliar que copia un fichero en otro
+	 * @param origen Fichero de origen
+	 * @param destino Fichero de destino
+	 */
 	public void copiarFicheros(File origen, File destino) {
 		try {
 			InputStream in = new FileInputStream(origen);
@@ -295,7 +434,7 @@ public class gestionJuegosBean implements Serializable {
 	
 public void eliminar() {
 		
-		String url = URLs.GETJUEGO + this.juegoform.getIdJuego() ;
+		String url = URLs.GETJUEGO + this.juegoform.getId_juego() ;
 		System.out.println("Petición de elimnar juego: " + url);
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.delete(url);
@@ -305,17 +444,8 @@ public void eliminar() {
 
 	}
 
-	public List<Juego> listarJuegos() {
-		String url = URLs.GETJUEGO;
-		System.out.println("Petición de obtener el juego: " + url);
-		RestTemplate restTemplate = new RestTemplate();
-		ResponseEntity<List<Juego>> response = restTemplate.exchange(
-				url ,HttpMethod.GET, null, new ParameterizedTypeReference<List<Juego>>(){});
-		
-		return response.getBody();
-		
-		
-	}
+	
+	
 
 	public void onSelectJuego(SelectEvent event) {
 
@@ -328,14 +458,8 @@ public void eliminar() {
 		
 	}
 	
-	public void resetForm() {
-        this.juegoform = new Juego();
-        this.setEtapasSeleccionadas(null);
-        this.setTipoRespuesta("0");
-        this.verModificar = false;
-        this.fieldLegend = "Nuevo Juego";
-        this.ficheroSubido = false;
-    }
+	
+	
 public void aplicarFiltros() {
 		
 		System.out.println("Aplicar filtros");
@@ -483,27 +607,14 @@ public Juego getJuego(Integer id) {
         }
 		
         for (Juego juego : this.juegosListadoCompleto){
-            if (id.equals(juego.getIdJuego())){
+            if (id.equals(juego.getId_juego())){
                 return juego;
             }
         }
         return null;
 	}
 
-public void handleFileUpload(FileUploadEvent event) {
-  
-	UploadedFile fichero = event.getFile();
-	this.juegoform.setNombreZip(fichero.getFileName().split(".zip")[0]);
-	this.juegoform.setRutaZip(Rutas.rutaZip);
-	
-    try {
-    	fichero.write(Rutas.rutaZip + fichero.getFileName());
-    	this.ficheroSubido = true;
-	} catch (Exception e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
-}
+
 
 	// GETTERS & SETTERS
 

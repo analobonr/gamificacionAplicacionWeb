@@ -70,7 +70,7 @@ public class gestionUsuariosBean implements Serializable {
 		if((login == null) || (login.getRol() != rol_t.SUPER)) {
 			
 			try{
-				//Redireccionamos
+				//Redireccionamos a la interfaz de login
 	            eContext.redirect( eContext.getRequestContextPath() + URLs.pathlogin );
 			}catch(  Exception e ){
 				System.err.println(e);

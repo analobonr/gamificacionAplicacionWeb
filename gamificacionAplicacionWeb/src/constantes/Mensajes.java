@@ -17,6 +17,14 @@ public class Mensajes {
 	public static final String ERRORENVIOMAIL = "Se ha producido un error en el envío del email con la nueva contraseña. Inténtelo de nuevo";
 	public static final String ERRORNEWPASS2 = "Complete la dirección de correo electrónico para recibir su nueva contraseña.";
 	public static final String ERRORSUBIRZIP = "Debe subir el fichero zip del juego antes de añadirlo.";
+	public static final String ERRORGUARDARZIP = "Se ha producido un error al subir el zip. Inténtelo de nuevo.";
+	public static final String ERRORADDJUEGO = "Se ha producido un error al añadir el juego. Inténtelo de nuevo.";
+	public static final String ERRORVALJSONEQUIPOS = "La estructura del Json de equipos no es correcta";
+	public static final String ERRORVALJSONRESPUESTAS = "La estructura del Json de respuestas no es correcta";
+	public static final String ERRORVALJSONOTROS = "La estructura del Json de otros datos no es correcta";
+	public static final String ERRORVALJSONCONF = "La estructura del Json de configuración no es correcta";
+	
+	
 	
 	//Mensajes de info
 	public static final String HEADERNEWPASS = "Nueva contraseña";
