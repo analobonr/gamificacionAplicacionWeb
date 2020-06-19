@@ -520,7 +520,9 @@ public class configurarPartida implements Serializable {
 	}
 
 	
-	
+	/**
+	 * Método que realiza una copia de una plantilla
+	 */
 	public void duplicar() {
 
 		// Obtenemos el ID de la configuracion seleccionada
@@ -528,9 +530,8 @@ public class configurarPartida implements Serializable {
 		Map<String, String> params = context.getExternalContext().getRequestParameterMap();
 		String idConfiguracion = params.get("partidaID");
 
-		//Obtenemos la plantilla seleccionada
+		//Obtenemos la plantilla seleccionada (Petición GET)
 		String url = URLs.GETCONFPARTIDA + idConfiguracion;
-		System.out.println("Petición de obtener la plantilla: " + url);
 		RestTemplate restTemplate = new RestTemplate();
 		ResponseEntity<ConfPartida> response = restTemplate.exchange(url, HttpMethod.GET, null,
 				new ParameterizedTypeReference<ConfPartida>() {
@@ -542,13 +543,11 @@ public class configurarPartida implements Serializable {
 		plantilla.setTitulo(plantilla.getTitulo() + " (copia)");
 		
 		
+		//Realizamos la petición post para añadir la plantilla
 		url = URLs.NUEVACONFPARTIDA;
-		System.out.println("Petición nueva conf partida: " + url);
+		restTemplate.postForEntity(url, plantilla,null);
 
-		
-		//RestTemplate restTemplate = new RestTemplate();
-		restTemplate.postForEntity(url, plantilla, Estado.class);
-
+		//Recargamos la pagina
 		this.recargarPagina();
 	}
 	
