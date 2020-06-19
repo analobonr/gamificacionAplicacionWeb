@@ -17,11 +17,11 @@ a[id*=menuJuegos]{
 	width:25%;
 }
 
-span[id*=maxJug], span[id*=minJug], span[id*=minPregm], span[id*=minPregM],span[id*=maxPregm],span[id*=maxPregM]{
+span[id*=minFichMin], span[id*=maxFichMin], span[id*=minFichMax], span[id*=maxFichMax],span[id*=minPregmin],span[id*=maxPregmin]{
 	width: 60px;
 }
 
-span[id*=maxJug] > input, span[id*=minJug] > input, span[id*=minPregm] > input, span[id*=minPregM] > input,span[id*=maxPregm] > input,span[id*=maxPregM] > input{
+span[id*=minFichMin] > input, span[id*=maxFichMin] > input, span[id*=minFichMax] > input, span[id*=maxFichMax] > input,span[id*=minPregmin] > input,span[id*=maxPregmin] > input{
 	width: inherit;
 }
 
