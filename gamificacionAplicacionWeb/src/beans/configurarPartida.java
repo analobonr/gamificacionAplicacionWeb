@@ -27,6 +27,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.google.gson.Gson;
 
+import constantes.Mensajes;
 import constantes.URLs;
 import pojos.ConfPartida;
 import pojos.Estado;
@@ -95,6 +96,32 @@ public class configurarPartida implements Serializable {
 		this.correctas = 50;
 		this.tiempoRespuesta = 10;
 		this.fichero = 1;
+
+	}
+	
+	/**
+	 * Método que eliminar una plantilla/configuración de partida
+	 */
+	public void eliminar() {
+
+		// Obtenemos el ID de la configuracion seleccionada
+		FacesContext context = FacesContext.getCurrentInstance();
+		Map<String, String> params = context.getExternalContext().getRequestParameterMap();
+		String idConfiguracion = params.get("partidaID");
+
+		try {
+			//Realizamos la peticion de delete para eliminar la partida
+			String url = URLs.CONFPARTIDA + idConfiguracion;
+			RestTemplate restTemplate = new RestTemplate();
+			restTemplate.delete(url);
+	
+			//Recargamos la pagina
+			this.recargarPagina();
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+			context.addMessage(null, new FacesMessage(Mensajes.HEADERERROR,  Mensajes.ERRORDELETEPLANTILLA));
+		}
 
 	}
 
@@ -492,21 +519,7 @@ public class configurarPartida implements Serializable {
 
 	}
 
-	public void eliminar() {
-
-		// Obtenemos el ID de la configuracion seleccionada
-		FacesContext context = FacesContext.getCurrentInstance();
-		Map<String, String> params = context.getExternalContext().getRequestParameterMap();
-		String idConfiguracion = params.get("partidaID");
-
-		String url = URLs.CONFPARTIDA + idConfiguracion;
-		System.out.println("Petición delete confpartida: " + url);
-		RestTemplate restTemplate = new RestTemplate();
-		restTemplate.delete(url);
-
-		this.recargarPagina();
-
-	}
+	
 	
 	public void duplicar() {
 
@@ -539,6 +552,10 @@ public class configurarPartida implements Serializable {
 		this.recargarPagina();
 	}
 	
+	
+	/**
+	 * Método que recarga la interfaz actual
+	 */
 	private void recargarPagina() {
 		ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
 

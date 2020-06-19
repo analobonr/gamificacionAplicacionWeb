@@ -156,7 +156,7 @@ public class gestionUsuariosBean implements Serializable {
 			}catch(Exception e){
 				System.err.println(e.getMessage());
 				FacesContext context = FacesContext.getCurrentInstance();
-				context.addMessage(null, new FacesMessage(Mensajes.HEADERERROR,  Mensajes.ERROREDITUSER));
+				context.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,Mensajes.HEADERERROR,  Mensajes.ERROREDITUSER));
 			}
 				
 			

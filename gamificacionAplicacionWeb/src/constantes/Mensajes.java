@@ -16,11 +16,15 @@ public class Mensajes {
 	public static final String ERRORNEWPASS = "Se ha producido un error en la autogeneración de la nueva contraseña. Inténtelo de nuevo.";
 	public static final String ERRORENVIOMAIL = "Se ha producido un error en el envío del email con la nueva contraseña. Inténtelo de nuevo";
 	public static final String ERRORNEWPASS2 = "Complete la dirección de correo electrónico para recibir su nueva contraseña.";
+	
+	//Mensajes de error - juegos
 	public static final String ERRORSUBIRZIP = "Debe subir el fichero zip del juego antes de añadirlo.";
 	public static final String ERRORGUARDARZIP = "Se ha producido un error al subir el zip. Inténtelo de nuevo.";
 	public static final String ERRORADDJUEGO = "Se ha producido un error al añadir el juego. Inténtelo de nuevo.";
 	public static final String ERROREDITJUEGO = "Se ha producido un error al modificar el juego. Inténtelo de nuevo.";
 	public static final String ERRORDELETEJUEGO = "Se ha producido un error al eliminar el juego. Inténtelo de nuevo";
+	
+	public static final String ERRORDELETEPLANTILLA = "Se ha producido un error al eliminar la plantilla. Inténtelo de nuevo";
 
 	
 	
