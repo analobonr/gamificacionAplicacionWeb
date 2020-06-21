@@ -92,13 +92,6 @@ public class configurarPartida implements Serializable {
 	@PostConstruct
 	public void init() {
 
-		// No se si se usa (creo que no)
-		/*
-		 * FacesContext context = FacesContext.getCurrentInstance(); Map<String, String>
-		 * params = context.getExternalContext().getRequestParameterMap(); this.email =
-		 * params.get("email");
-		 */
-
 		// Inicializamos las variables para el dialogo de configuracion de plantilla
 		this.configSeleccionada = "-1";
 		this.estiloPanelInfoJuego = invisible;
@@ -258,8 +251,18 @@ public class configurarPartida implements Serializable {
 
 			// Si tiene configuracion de equipos se obtiene
 			if (this.equipos != null) {
-				// Guardamos los nombres de los grupos
-				this.equipos.getGrupos().getNombresGrupos().setVariablesJuego(this.nombresGrupos);
+				
+				//Si la confiugracion es de grupos
+				if (this.equipos.getGrupos() != null) {
+					
+					// Guardamos los nombres de los grupos
+					this.equipos.getGrupos().getNombresGrupos().setVariablesJuego(this.nombresGrupos);
+					
+				//Si la configuracion es de equipos
+				}else if (this.equipos.getEquipos() != null) {
+					this.equipos.getEquipos().setEquipos(this.listaEquipos);
+				}
+				
 
 				// Convertimos los equipos en un json en string
 				Gson gson = new Gson();
@@ -358,7 +361,13 @@ public class configurarPartida implements Serializable {
 
 			// Si es equipos -> renderizamos el json de conf
 		} else if (newStep.contains("equipos")) {
-			this.renderizarEquipos();
+			
+			try {
+				this.renderizarEquipos();
+			}catch(Exception e) {
+				e.printStackTrace();
+				this.equipos = null;
+			}
 
 			// Si es configuracion
 		} else if (newStep.contains("configuracion")) {
@@ -383,7 +392,6 @@ public class configurarPartida implements Serializable {
 
 		// Obtenemos el juego
 		this.juegoSeleccionado = (Juego) event.getObject();
-		System.out.println("Juego seleccionado: " + juegoSeleccionado.getNombre());
 
 		// Cambiamos el panel para mostrar la info del juego
 		this.estiloPanelInfoJuego = visible;
@@ -413,7 +421,6 @@ public class configurarPartida implements Serializable {
 
 		// Llamada GET al servicio rest correspondiente
 		String url = URLs.GETJUEGO + idJuego;
-		System.out.println("Petición de obtener el juego: " + url);
 		RestTemplate restTemplate = new RestTemplate();
 		ResponseEntity<Juego> response = restTemplate.exchange(url, HttpMethod.GET, null,
 				new ParameterizedTypeReference<Juego>() {
@@ -446,7 +453,6 @@ public class configurarPartida implements Serializable {
 		Gson gson = new Gson();
 		this.equipos = gson.fromJson(configuracionEquipos, ParametrosGE.class);
 
-		System.out.println(configuracionEquipos);
 
 		// Si existe json con los grupos
 		if ((this.equipos != null) && (this.equipos.getGrupos() != null)) {
@@ -472,37 +478,6 @@ public class configurarPartida implements Serializable {
 				// Inicializamos el minimo y maxmio de grupos
 				this.minimoGrupos = new Integer(this.equipos.getGrupos().getNumeroGrupos().getRango().getValorMinimo());
 				this.maximoGrupos = new Integer(this.equipos.getGrupos().getNumeroGrupos().getRango().getValorMaximo());
-
-				// Si existen equipos
-				/*
-				 * if (this.equipos.getEquipos() != null) { // Obtenemos el numero de equipos
-				 * por defecto int numEquiposDef =
-				 * this.equipos.getEquipos().getNumeroEquipos().getRango().getValorDefecto();
-				 * variables = this.equipos.getEquipos().getNumeroEquipos().getVariablesJuego();
-				 * 
-				 * // Le asignamos el numero de grupos por defecto a la variable if
-				 * (variables.size() == 1) {
-				 * variables.get(0).setValor(Integer.toString(numEquiposDef)); }
-				 * 
-				 * this.equipos.getEquipos().getNumeroEquipos().setVariablesJuego(variables);
-				 * 
-				 * //Insertamos a los equipos a la lista para mostrarlos
-				 * this.setListaEquipos(this.equipos.getEquipos().getMiembrosEquipos().subList(
-				 * 0, numEquiposDef)); List<Variable> vEquipos =
-				 * this.equipos.getEquipos().getNombresEquipos().getVariablesJuego().subList(0,
-				 * numEquiposDef);
-				 * 
-				 * int contador = 0; for (Variable v : vEquipos) {
-				 * this.listaEquipos.get(contador).setNombreEquipo(v); contador++; }
-				 * 
-				 * // Inicializamos el minimo y maxmio de equipos this.minimoEquipos = new
-				 * Integer(this.equipos.getEquipos().getNumeroEquipos().getRango().
-				 * getValorMinimo()); this.maximoEquipos = new
-				 * Integer(this.equipos.getEquipos().getNumeroEquipos().getRango().
-				 * getValorMaximo());
-				 * 
-				 * }
-				 */
 
 				// Si estamos editando una plantilla
 			} else {
@@ -546,9 +521,11 @@ public class configurarPartida implements Serializable {
 		}
 	}
 
+	/**
+	 * Listener para cambiar el numero de grupos
+	 * @param e ValueChangeEvent
+	 */
 	public void numGruposChange(ValueChangeEvent e) {
-
-		System.out.println("numGruposChange eventp");
 
 		int nuevoValor = Integer.parseInt(e.getNewValue().toString());
 		int antiguoValor = Integer.parseInt(e.getOldValue().toString());
@@ -572,7 +549,6 @@ public class configurarPartida implements Serializable {
 			Gson gson = new Gson();
 			ParametrosGE eq = gson.fromJson(configuracionEquipos, ParametrosGE.class);
 			for (int i = 0; i < diferencia; i++) {
-				System.out.println(eq.getGrupos().getNombresGrupos().getVariablesJuego().size());
 				Variable v = eq.getGrupos().getNombresGrupos().getVariablesJuego().get(antiguoValor + i);
 				this.nombresGrupos.add(v);
 
@@ -581,6 +557,10 @@ public class configurarPartida implements Serializable {
 
 	}
 
+	/**
+	 * Listener para cambiar el numero de equipos
+	 * @param e ValueChangeEvent
+	 */
 	public void numEquiposChange(ValueChangeEvent e) {
 
 		int nuevoValor = Integer.parseInt(e.getNewValue().toString());
@@ -613,6 +593,10 @@ public class configurarPartida implements Serializable {
 		}
 	}
 
+	/**
+	 * Listener para cambiar el numero de grupos dentro de un equipo
+	 * @param e ValueChangeEvent
+	 */
 	public void numGruposEquipoChange(ValueChangeEvent e) {
 
 		// Hay que saber que equipo se esta modificando
@@ -648,7 +632,9 @@ public class configurarPartida implements Serializable {
 
 	}
 
-	// Método que obtiene todos los juegos disponibles
+	/**
+	 * Método que obtiene el listado de juegos
+	 */
 	public void listJuegos() {
 
 		// Llamada GET al servicio rest correspondiente
