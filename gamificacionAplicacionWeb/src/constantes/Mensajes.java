@@ -24,7 +24,12 @@ public class Mensajes {
 	public static final String ERROREDITJUEGO = "Se ha producido un error al modificar el juego. Inténtelo de nuevo.";
 	public static final String ERRORDELETEJUEGO = "Se ha producido un error al eliminar el juego. Inténtelo de nuevo";
 	
+	
+	//Mensajes de error - plantillas
 	public static final String ERRORDELETEPLANTILLA = "Se ha producido un error al eliminar la plantilla. Inténtelo de nuevo";
+	public static final String ERRORGETPLANTILLA = "Se ha producido un error al obtener la plantilla. Inténtelo de nuevo";
+	public static final String ERRORPOSTPLANTILLA = "Se ha producido un error al crear la plantilla. Inténtelo de nuevo";
+	public static final String ERRORPUTPLANTILLA = "Se ha producido un error al modificar la plantilla. Inténtelo de nuevo";
 
 	
 	

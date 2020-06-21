@@ -17,7 +17,6 @@ import javax.faces.context.FacesContext;
 import javax.faces.event.ValueChangeEvent;
 import javax.servlet.http.HttpServletRequest;
 
-
 import org.primefaces.event.FlowEvent;
 import org.primefaces.event.SelectEvent;
 import org.springframework.core.ParameterizedTypeReference;
@@ -37,68 +36,156 @@ import pojos.configuracionEquipos.Equipo;
 import pojos.configuracionEquipos.ParametrosGE;
 import pojos.configuracionEquipos.Variable;
 
-/*Bean que maneja los datos de partidaForm para la configuración de una partida*/
-
+/**
+ * Bean que maneja los datos para la gestión de configuraciones de
+ * partidas/plantillas
+ * 
+ * @author Ana Lobón
+ * @version v1.0 (20/06/2020)
+ */
 @ManagedBean
 public class configurarPartida implements Serializable {
 
 	private static final long serialVersionUID = 3885381981170292304L;
 
+	// Identificador de la plantilla seleccionada
 	private String configSeleccionada;
 
-	private Juego juegoSeleccionado;
-	private List<Juego> juegos;
-	private String caratulaSrc;
-	private String capturaSrc;
-
-	private List<String> listaPrueba;
-
+	// Variables para la informacion general de la plantilla
 	private String titulo;
 	private String etapa;
 	private String curso;
 	private String asignatura;
 	private String tema;
+
+	// Variables para la seleccion del juego
+	private Juego juegoSeleccionado;
+	private List<Juego> juegos;
+	private String caratulaSrc;
+	private String capturaSrc;
+	private String visible = "panelVisible";
+	private String invisible = "panelInvisible";
+	private String estiloPanelInfoJuego;
+	private String estiloPanelSelectJuego;
+
+	// Variables para la configuracion general de la plantilla
 	private Integer fichero;
 	private Integer correctas;
 	private Integer tiempoRespuesta;
 
-	private String email;
-
-	private String visible = "panelVisible";
-	private String invisible = "panelInvisible";
-
-	private String estiloPanelInfoJuego;
-	private String estiloPanelSelectJuego;
-
+	// Variables para la configuracion de grupos y equipos
 	private ParametrosGE equipos;
 	private List<Variable> nombresGrupos;
 	private List<Equipo> listaEquipos;
-
 	private Integer minimoGrupos;
 	private Integer maximoGrupos;
-
 	private Integer minimoEquipos;
 	private Integer maximoEquipos;
-	
-	private Integer idProfesor;
 
-	// Post Constructor. Se ejecuta al cargar la pagina
+	private String email;
+	private Integer idProfesor;
+	private List<String> listaPrueba;
+
+	/**
+	 * Post Constructor. Se ejecuta al cargar la pagina index.xhtml
+	 */
 	@PostConstruct
 	public void init() {
 
-		FacesContext context = FacesContext.getCurrentInstance();
-		Map<String, String> params = context.getExternalContext().getRequestParameterMap();
-		this.email = params.get("email");
+		// No se si se usa (creo que no)
+		/*
+		 * FacesContext context = FacesContext.getCurrentInstance(); Map<String, String>
+		 * params = context.getExternalContext().getRequestParameterMap(); this.email =
+		 * params.get("email");
+		 */
+
+		// Inicializamos las variables para el dialogo de configuracion de plantilla
 		this.configSeleccionada = "-1";
 		this.estiloPanelInfoJuego = invisible;
 		this.estiloPanelSelectJuego = visible;
-
 		this.correctas = 50;
 		this.tiempoRespuesta = 10;
 		this.fichero = 1;
 
 	}
+
+	/**
+	 * Método que realiza la llamada get para obtener una configuracion
+	 * 
+	 * @param idConf Identificador de la partida
+	 * @return La configuración de la partida correspondiente o null en caso de
+	 *         error.
+	 */
+	public ConfPartida obtenerConfiguracion(String idConf) {
+
+		ConfPartida cp = null;
+
+		try {
+			// Llamada GET al servicio rest correspondiente
+			String url = URLs.GETCONFPARTIDA + idConf;
+			RestTemplate restTemplate = new RestTemplate();
+			ResponseEntity<ConfPartida> response = restTemplate.exchange(url, HttpMethod.GET, null,
+					new ParameterizedTypeReference<ConfPartida>() {
+					});
+
+			cp = response.getBody();
+
+			// Capturamos errores
+		} catch (Exception e) {
+			e.printStackTrace();
+			FacesContext context = FacesContext.getCurrentInstance();
+			context.addMessage(null, new FacesMessage(Mensajes.HEADERERROR, Mensajes.ERRORDELETEPLANTILLA));
+		}
+
+		return cp;
+
+	}
 	
+	/**
+	 * Método que realiza la llamada post para crear una nueva plantilla
+	 * @param plantilla Configuración de partida
+	 */
+	public boolean postPlantilla(ConfPartida plantilla) {
+		
+		boolean error = false;
+		try {
+			// Realizamos la petición post para añadir la plantilla
+			String url = URLs.NUEVACONFPARTIDA;
+			RestTemplate restTemplate = new RestTemplate();
+			restTemplate.postForEntity(url, plantilla, null);
+		} catch (Exception e) {
+			error = true;
+			e.printStackTrace();
+			FacesContext context = FacesContext.getCurrentInstance();
+			context.addMessage(null, new FacesMessage(Mensajes.HEADERERROR, Mensajes.ERRORPOSTPLANTILLA));
+		}
+		
+		return error;
+	}
+	
+	/**
+	 * Método que realiza la llamada put para modificar una nueva plantilla
+	 * @param plantilla Configuración de partida
+	 */
+	public boolean putPlantilla(ConfPartida plantilla) {
+		boolean error = false;
+		
+		try {
+			String url = URLs.NUEVACONFPARTIDA;
+			RestTemplate restTemplate = new RestTemplate();
+			restTemplate.put(url, plantilla);
+		} catch (Exception e) {
+			error = true;
+			e.printStackTrace();
+			FacesContext context = FacesContext.getCurrentInstance();
+			context.addMessage(null, new FacesMessage(Mensajes.HEADERERROR, Mensajes.ERRORPUTPLANTILLA));
+		}
+		
+		return error;
+	}
+
+	
+
 	/**
 	 * Método que eliminar una plantilla/configuración de partida
 	 */
@@ -110,22 +197,122 @@ public class configurarPartida implements Serializable {
 		String idConfiguracion = params.get("partidaID");
 
 		try {
-			//Realizamos la peticion de delete para eliminar la partida
+			// Realizamos la peticion de delete para eliminar la partida
 			String url = URLs.CONFPARTIDA + idConfiguracion;
 			RestTemplate restTemplate = new RestTemplate();
 			restTemplate.delete(url);
-	
-			//Recargamos la pagina
+
+			// Recargamos la pagina
 			this.recargarPagina();
-			
-		}catch(Exception e) {
+
+		} catch (Exception e) {
 			e.printStackTrace();
-			context.addMessage(null, new FacesMessage(Mensajes.HEADERERROR,  Mensajes.ERRORDELETEPLANTILLA));
+			context.addMessage(null, new FacesMessage(Mensajes.HEADERERROR, Mensajes.ERRORDELETEPLANTILLA));
 		}
 
 	}
 
-	// Metodo que establece el id de la configuracion de partida seleccionada
+	/**
+	 * Método que realiza una copia de una plantilla
+	 */
+	public void duplicar() {
+
+		// Obtenemos el ID de la configuracion seleccionada
+		FacesContext context = FacesContext.getCurrentInstance();
+		Map<String, String> params = context.getExternalContext().getRequestParameterMap();
+		String idConfiguracion = params.get("partidaID");
+
+		// Obtenemos la plantilla seleccionada (Petición GET)
+		ConfPartida plantilla = this.obtenerConfiguracion(idConfiguracion);
+
+		if (plantilla != null) {
+			// Cambiamos el id y el nombre de la plantilla
+			plantilla.setId_configuracion(-1);
+			plantilla.setTitulo(plantilla.getTitulo() + " (copia)");
+
+			// Realizamos la petición post para añadir la plantilla
+			boolean error = this.postPlantilla(plantilla);
+
+			if (!error) {
+				// Recargamos la pagina
+				this.recargarPagina();
+			}
+		}
+	}
+	
+	/**
+	 * Método que recoge la información de la plantilla del dialogo y crea o
+	 * modifica la plantilla
+	 */
+	public void guardar() {
+
+		// Comprobamos que hay un juego seleccionado
+		if (juegoSeleccionado != null) {
+
+			// Obtenemos identificador del profesor
+			FacesContext context = FacesContext.getCurrentInstance();
+			Map<String, String> params = context.getExternalContext().getRequestParameterMap();
+			this.idProfesor = new Integer(params.get("id_profesor"));
+
+			String configuracionGE = "";
+
+			// Si tiene configuracion de equipos se obtiene
+			if (this.equipos != null) {
+				// Guardamos los nombres de los grupos
+				this.equipos.getGrupos().getNombresGrupos().setVariablesJuego(this.nombresGrupos);
+
+				// Convertimos los equipos en un json en string
+				Gson gson = new Gson();
+				configuracionGE = gson.toJson(this.equipos, ParametrosGE.class);
+				System.out.println(configuracionGE);
+			}
+
+			//Inicializamos la configuracion
+			ConfPartida configuracion = new ConfPartida(new Integer(this.configSeleccionada), this.idProfesor,
+					juegoSeleccionado.getId_juego(), 1, this.titulo, this.etapa, this.curso, this.asignatura, this.tema,
+					this.correctas, "", configuracionGE, this.tiempoRespuesta);
+
+			boolean error = false;
+			//Nueva plantilla
+			if (configuracion.getId_configuracion() == -1) {
+				error = this.postPlantilla(configuracion);
+
+			//Modificamos la plantilla
+			} else {
+				error = this.putPlantilla(configuracion);
+			}
+			
+			if (!error) {
+				this.recargarPagina();
+			}
+		}
+	}
+
+	/**
+	 * Método que establece las variables del dialogo de configuracion de plantillas
+	 * para crear una nueva plantilla
+	 */
+	public void resetearConfig() {
+
+		// Inicializamos las variables
+		this.configSeleccionada = "-1";
+		this.titulo = "";
+		this.etapa = "";
+		this.curso = "";
+		this.asignatura = "";
+		this.tema = "";
+		this.fichero = 1;
+		this.correctas = 50;
+		this.estiloPanelInfoJuego = invisible;
+		this.estiloPanelSelectJuego = visible;
+
+	}
+
+	/**
+	 * Metodo que establece el id de la configuracion de partida seleccionada e
+	 * inicializa las variables necesarias para mostrarla en el dialogo de
+	 * configuracion
+	 */
 	public void seleccionarConf() {
 
 		// Obtenemos el ID de la configuracion seleccionada
@@ -136,34 +323,90 @@ public class configurarPartida implements Serializable {
 		// Obtenemos la configuracion
 		ConfPartida cp = this.obtenerConfiguracion(params.get("partidaID"));
 
-		// Asociamos la configuracion a las variables del formulario
-		this.titulo = cp.getTitulo();
-		this.etapa = cp.getEtapa();
-		this.curso = cp.getCurso();
-		this.asignatura = cp.getAsignatura();
-		this.tema = cp.getTema();
-		this.fichero = cp.getId_fpreguntas();
-		this.correctas = cp.getPorcentaje_correccion();
-		this.obtenerJuego(cp.getId_juego());
+		if (cp != null) {
 
-		this.estiloPanelInfoJuego = visible;
-		this.estiloPanelSelectJuego = invisible;
+			// Asociamos la configuracion a las variables del formulario
+			this.titulo = cp.getTitulo();
+			this.etapa = cp.getEtapa();
+			this.curso = cp.getCurso();
+			this.asignatura = cp.getAsignatura();
+			this.tema = cp.getTema();
+			this.fichero = cp.getId_fpreguntas();
+			this.correctas = cp.getPorcentaje_correccion();
+			this.obtenerJuego(cp.getId_juego());
+
+			// Visibilizamos la info del juego de la plantilla
+			this.estiloPanelInfoJuego = visible;
+			this.estiloPanelSelectJuego = invisible;
+		}
+	}
+
+	/**
+	 * Método para cambiar de pestaña en el dialogo de configuracion de plantilla
+	 * 
+	 * @param event
+	 * @return
+	 */
+	public String cambiarTab(FlowEvent event) {
+
+		// Nuevo tab
+		String newStep = event.getNewStep();
+
+		// Si es juego -> obtenemos la lista de juegos
+		if (newStep.contains("juego")) {
+			this.listJuegos();
+
+			// Si es equipos -> renderizamos el json de conf
+		} else if (newStep.contains("equipos")) {
+			this.renderizarEquipos();
+
+			// Si es configuracion
+		} else if (newStep.contains("configuracion")) {
+			// Si no se ha seleccionado el juego volvemos a cargar el tab juego
+			if (juegoSeleccionado == null) {
+				FacesContext.getCurrentInstance().addMessage(null,
+						new FacesMessage(FacesMessage.SEVERITY_ERROR, "Debe seleccionar un juego", ""));
+				newStep = "juego";
+			}
+		}
+
+		return newStep;
 
 	}
 
-	public ConfPartida obtenerConfiguracion(String idConf) {
+	/**
+	 * Método que permite mostrar la información del juego seleccionado
+	 * 
+	 * @param event Evento con el juego seleccionado
+	 */
+	public void onSelectJuego(SelectEvent event) {
 
-		// Llamada GET al servicio rest correspondiente
-		String url = URLs.GETCONFPARTIDA + idConf;
-		System.out.println("Petición de obtener conf partida: " + url);
-		RestTemplate restTemplate = new RestTemplate();
-		ResponseEntity<ConfPartida> response = restTemplate.exchange(url, HttpMethod.GET, null,
-				new ParameterizedTypeReference<ConfPartida>() {
-				});
-		ConfPartida cp = response.getBody();
+		// Obtenemos el juego
+		this.juegoSeleccionado = (Juego) event.getObject();
+		System.out.println("Juego seleccionado: " + juegoSeleccionado.getNombre());
 
-		return cp;
+		// Cambiamos el panel para mostrar la info del juego
+		this.estiloPanelInfoJuego = visible;
+		this.estiloPanelSelectJuego = invisible;
 
+		// Asignamos valor para mostrar las imagenes del juego seleccionado
+		this.setCaratulaSrc(juegoSeleccionado.getNombreZip().split("jug-")[1] + ".png");
+		this.setCapturaSrc(juegoSeleccionado.getNombreZip().split("jug-")[1] + "-cap.jpg");
+
+	}
+
+	/**
+	 * Método que inicializa las variables necesarias para mostrar el listado de
+	 * juegos
+	 */
+	public void cambiarJuego() {
+
+		// Ocultamos el panel de info y visibilizamos el de selección
+		this.estiloPanelInfoJuego = invisible;
+		this.estiloPanelSelectJuego = visible;
+
+		// Inicializamos a null
+		this.juegoSeleccionado = null;
 	}
 
 	private void obtenerJuego(Integer idJuego) {
@@ -178,43 +421,18 @@ public class configurarPartida implements Serializable {
 		this.juegoSeleccionado = response.getBody();
 		this.setCaratulaSrc(juegoSeleccionado.getNombreZip().split("jug-")[1] + ".png");
 		this.setCapturaSrc(juegoSeleccionado.getNombreZip().split("jug-")[1] + "-cap.jpg");
-		
-		
 
 	}
 
-	public void cambiarJuego() {
-		this.estiloPanelInfoJuego = invisible;
-		this.estiloPanelSelectJuego = visible;
-		this.juegoSeleccionado = null;
-	}
-
-	// Método para cambiar de pestana
-	public String onFlowProcess(FlowEvent event) {
-
-		String newStep = event.getNewStep();
-
-		if (newStep.contains("juego")) {
-			this.listJuegos();
-		} else if (newStep.contains("equipos")) {
-			this.renderizarEquipos();
-		} else if (newStep.contains("configuracion")) {
-			// Si no se ha seleccionado el juego se queda en la misma
-			if (juegoSeleccionado == null) {
-				FacesContext.getCurrentInstance().addMessage(null,
-						new FacesMessage(FacesMessage.SEVERITY_ERROR, "Debe seleccionar un juego", ""));
-				newStep = "juego";
-			}
-		}
-
-		return newStep;
-
-	}
-
+	/**
+	 * Método que inicializa a partir del json las variables necesarias para el
+	 * formulario de grupos y equipos
+	 */
 	public void renderizarEquipos() {
 
 		boolean cargarConfiguracion = false;
-		// Obtenemos el objeto con la info base
+
+		// Obtenemos el sting json con la info base
 		String configuracionEquipos = this.juegoSeleccionado.getJsonEquipos();
 		if (this.configSeleccionada != "-1") {
 			ConfPartida cp = this.obtenerConfiguracion(this.configSeleccionada);
@@ -224,90 +442,88 @@ public class configurarPartida implements Serializable {
 			}
 		}
 
-		//Transformaos a objeto el JSON
+		// Transformaos a objeto el JSON
 		Gson gson = new Gson();
 		this.equipos = gson.fromJson(configuracionEquipos, ParametrosGE.class);
 
 		System.out.println(configuracionEquipos);
-		
-		//Si existe json con los equipos
+
+		// Si existe json con los grupos
 		if ((this.equipos != null) && (this.equipos.getGrupos() != null)) {
-			
-			
-			
-			//Si se crea una nueva plantilla
+
+			// Si se crea una nueva plantilla
 			if (!cargarConfiguracion) {
-				
+
 				// Obtenemos el numero de grupos por defecto
 				int numGruposDef = this.equipos.getGrupos().getNumeroGrupos().getRango().getValorDefecto();
 				List<Variable> variables = this.equipos.getGrupos().getNumeroGrupos().getVariablesJuego();
 
 				// Le asignamos el numero de grupos por defecto a la variable
-				if ((variables.size() == 1) && (variables.get(0).getValor().isEmpty()) ) {
+				if ((variables.size() == 1) && (variables.get(0).getValor().isEmpty())) {
 					variables.get(0).setValor(Integer.toString(numGruposDef));
 				}
 
 				this.equipos.getGrupos().getNumeroGrupos().setVariablesJuego(variables);
-				
-				// Insertamos tantos grupos  como indique el valor por defecto
+
+				// Insertamos tantos grupos como indique el valor por defecto
 				this.setNombresGrupos(
 						this.equipos.getGrupos().getNombresGrupos().getVariablesJuego().subList(0, numGruposDef));
-				
-				
+
 				// Inicializamos el minimo y maxmio de grupos
 				this.minimoGrupos = new Integer(this.equipos.getGrupos().getNumeroGrupos().getRango().getValorMinimo());
 				this.maximoGrupos = new Integer(this.equipos.getGrupos().getNumeroGrupos().getRango().getValorMaximo());
-				
-	
-				//Si existen equipos
-				/*if (this.equipos.getEquipos() != null) {
-					// Obtenemos el numero de equipos por defecto
-					int numEquiposDef = this.equipos.getEquipos().getNumeroEquipos().getRango().getValorDefecto();
-					variables = this.equipos.getEquipos().getNumeroEquipos().getVariablesJuego();
-	
-					// Le asignamos el numero de grupos por defecto a la variable
-					if (variables.size() == 1) {
-						variables.get(0).setValor(Integer.toString(numEquiposDef));
-					}
-	
-					this.equipos.getEquipos().getNumeroEquipos().setVariablesJuego(variables);
-	
-					//Insertamos a los equipos a la lista para mostrarlos
-					this.setListaEquipos(this.equipos.getEquipos().getMiembrosEquipos().subList(0, numEquiposDef));
-					List<Variable> vEquipos = this.equipos.getEquipos().getNombresEquipos().getVariablesJuego().subList(0,
-							numEquiposDef);
-					
-					int contador = 0;
-					for (Variable v : vEquipos) {
-						this.listaEquipos.get(contador).setNombreEquipo(v);
-						contador++;
-					}
-					
-					// Inicializamos el minimo y maxmio de equipos
-					this.minimoEquipos = new Integer(this.equipos.getEquipos().getNumeroEquipos().getRango().getValorMinimo());
-					this.maximoEquipos = new Integer(this.equipos.getEquipos().getNumeroEquipos().getRango().getValorMaximo());
-				
-				}*/
-				
-			//Si estamos editando una plantilla
+
+				// Si existen equipos
+				/*
+				 * if (this.equipos.getEquipos() != null) { // Obtenemos el numero de equipos
+				 * por defecto int numEquiposDef =
+				 * this.equipos.getEquipos().getNumeroEquipos().getRango().getValorDefecto();
+				 * variables = this.equipos.getEquipos().getNumeroEquipos().getVariablesJuego();
+				 * 
+				 * // Le asignamos el numero de grupos por defecto a la variable if
+				 * (variables.size() == 1) {
+				 * variables.get(0).setValor(Integer.toString(numEquiposDef)); }
+				 * 
+				 * this.equipos.getEquipos().getNumeroEquipos().setVariablesJuego(variables);
+				 * 
+				 * //Insertamos a los equipos a la lista para mostrarlos
+				 * this.setListaEquipos(this.equipos.getEquipos().getMiembrosEquipos().subList(
+				 * 0, numEquiposDef)); List<Variable> vEquipos =
+				 * this.equipos.getEquipos().getNombresEquipos().getVariablesJuego().subList(0,
+				 * numEquiposDef);
+				 * 
+				 * int contador = 0; for (Variable v : vEquipos) {
+				 * this.listaEquipos.get(contador).setNombreEquipo(v); contador++; }
+				 * 
+				 * // Inicializamos el minimo y maxmio de equipos this.minimoEquipos = new
+				 * Integer(this.equipos.getEquipos().getNumeroEquipos().getRango().
+				 * getValorMinimo()); this.maximoEquipos = new
+				 * Integer(this.equipos.getEquipos().getNumeroEquipos().getRango().
+				 * getValorMaximo());
+				 * 
+				 * }
+				 */
+
+				// Si estamos editando una plantilla
 			} else {
-				
-				//Asignamos valores a las variables para el renderizado
+
+				// Asignamos valores a las variables para el renderizado
 				this.setNombresGrupos(this.equipos.getGrupos().getNombresGrupos().getVariablesJuego());
-				
+
 				this.minimoGrupos = new Integer(this.equipos.getGrupos().getNumeroGrupos().getRango().getValorMinimo());
 				this.maximoGrupos = new Integer(this.equipos.getGrupos().getNumeroGrupos().getRango().getValorMaximo());
 
 				// Falta la lista de equipos
 			}
-			
-		}else if ((this.equipos != null) && (this.equipos.getEquipos() != null)) {
-			
+
+			// Si existe json con los equipos
+		} else if ((this.equipos != null) && (this.equipos.getEquipos() != null)) {
+
 			// Inicializamos el minimo y maxmio de equipos
 			this.minimoEquipos = new Integer(this.equipos.getEquipos().getNumeroEquipos().getRango().getValorMinimo());
 			this.maximoEquipos = new Integer(this.equipos.getEquipos().getNumeroEquipos().getRango().getValorMaximo());
-			
-			//Asignamos el valor inicial al numero de equipos
+
+			// Asignamos el valor inicial al numero de equipos
 			int numEquiposDef = this.equipos.getEquipos().getNumeroEquipos().getRango().getValorDefecto();
 			List<Variable> variables = this.equipos.getEquipos().getNumeroEquipos().getVariablesJuego();
 
@@ -317,21 +533,21 @@ public class configurarPartida implements Serializable {
 			}
 
 			this.equipos.getEquipos().getNumeroEquipos().setVariablesJuego(variables);
-			
-			// Insertamos tantos equipos  como indique el valor por defecto
+
+			// Insertamos tantos equipos como indique el valor por defecto
 			this.setListaEquipos(this.equipos.getEquipos().getEquipos().subList(0, numEquiposDef));
-			
-			//Asignamos el valor inicial al numero de grupos de cada equipo
+
+			// Asignamos el valor inicial al numero de grupos de cada equipo
 			for (Equipo e : this.equipos.getEquipos().getEquipos()) {
 				int gruposDefecto = e.getNumeroGrupos().getRango().getValorDefecto();
 				e.getNumeroGrupos().getVariablesJuego().get(0).setValor(Integer.toString(gruposDefecto));
-				
+
 			}
 		}
 	}
 
 	public void numGruposChange(ValueChangeEvent e) {
-			
+
 		System.out.println("numGruposChange eventp");
 
 		int nuevoValor = Integer.parseInt(e.getNewValue().toString());
@@ -389,22 +605,21 @@ public class configurarPartida implements Serializable {
 			Gson gson = new Gson();
 			ParametrosGE eq = gson.fromJson(configuracionEquipos, ParametrosGE.class);
 			for (int i = 0; i < diferencia; i++) {
-				
-				Equipo equipo = eq.getEquipos().getEquipos().get(antiguoValor+i);
+
+				Equipo equipo = eq.getEquipos().getEquipos().get(antiguoValor + i);
 				this.listaEquipos.add(equipo);
 
 			}
 		}
 	}
-	
+
 	public void numGruposEquipoChange(ValueChangeEvent e) {
 
-		//Hay que saber que equipo se esta modificando
-		
+		// Hay que saber que equipo se esta modificando
+
 		int nuevoValor = Integer.parseInt(e.getNewValue().toString());
 		int antiguoValor = Integer.parseInt(e.getOldValue().toString());
 
-		
 		nuevoValor = (nuevoValor > this.maximoEquipos) ? this.maximoEquipos
 				: ((nuevoValor < this.minimoEquipos) ? this.minimoEquipos : nuevoValor);
 		antiguoValor = (antiguoValor > this.maximoEquipos) ? this.maximoEquipos
@@ -424,84 +639,11 @@ public class configurarPartida implements Serializable {
 			Gson gson = new Gson();
 			ParametrosGE eq = gson.fromJson(configuracionEquipos, ParametrosGE.class);
 			for (int i = 0; i < diferencia; i++) {
-				
-				Equipo equipo = eq.getEquipos().getEquipos().get(antiguoValor+i);
+
+				Equipo equipo = eq.getEquipos().getEquipos().get(antiguoValor + i);
 				this.listaEquipos.add(equipo);
 
 			}
-		}
-
-	}
-
-	// Metodo para guardar una configuracion en la base de datos
-	public void guardar() {
-
-		if (juegoSeleccionado != null) {
-
-			// Obtenemos el email
-			FacesContext context = FacesContext.getCurrentInstance();
-			Map<String, String> params = context.getExternalContext().getRequestParameterMap();
-			this.idProfesor = new Integer(params.get("id_profesor"));
-
-			String configuracionGE = "";
-			
-			
-			//Si tiene configuracion de equipos se obtiene
-			if (this.equipos != null) {
-				// Guardamos los nombres de los grupos
-				this.equipos.getGrupos().getNombresGrupos().setVariablesJuego(this.nombresGrupos);
-	
-				// Convertimos los equipos en un json en string
-				Gson gson = new Gson();
-				configuracionGE = gson.toJson(this.equipos, ParametrosGE.class);
-				System.out.println(configuracionGE);
-			}
-
-			/*
-			 * ConfPartida configuracion = new
-			 * ConfPartida(this.email,juegoSeleccionado.getIdJuego(),this.fichero,this.
-			 * titulo, this.etapa,this.curso,this.asignatura,this.tema,this.correctas,"",
-			 * configuracionGE);
-			 */
-
-			// Momentaneo
-			ConfPartida configuracion = new ConfPartida(new Integer(this.configSeleccionada),this.idProfesor, juegoSeleccionado.getId_juego(), 1, this.titulo,
-					this.etapa, this.curso, this.asignatura, this.tema, this.correctas, "", configuracionGE,this.tiempoRespuesta);
-
-			Gson gson2 = new Gson();
-			String confString = gson2.toJson(configuracion, ConfPartida.class);
-			System.out.println(confString);
-
-			String url;
-			if (configuracion.getId_configuracion() == -1) {
-				url = URLs.NUEVACONFPARTIDA;
-				System.out.println("Petición nueva conf partida: " + url);
-
-			} else {
-				url = URLs.MODCONFPARTIDA;
-				System.out.println("Petición MOD conf partida: " + url);
-			}
-			RestTemplate restTemplate = new RestTemplate();
-			ResponseEntity<Estado> response = restTemplate.postForEntity(url, configuracion, Estado.class);
-
-			Estado state = response.getBody();
-
-			if (!response.getStatusCode().is2xxSuccessful() || !state.isEstado()) {
-				System.out.println("No se ha podido añadir la configuracion de la partida");
-			} else {
-				System.out.println("Configuracion añadida correctamente");
-				ExternalContext ec = FacesContext.getCurrentInstance().getExternalContext();
-
-				try {
-					ec.redirect(((HttpServletRequest) ec.getRequest()).getRequestURI());
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-
-		} else {
-			System.out.println("Juego seleccionado no disponible");
 		}
 
 	}
@@ -519,39 +661,6 @@ public class configurarPartida implements Serializable {
 
 	}
 
-	
-	/**
-	 * Método que realiza una copia de una plantilla
-	 */
-	public void duplicar() {
-
-		// Obtenemos el ID de la configuracion seleccionada
-		FacesContext context = FacesContext.getCurrentInstance();
-		Map<String, String> params = context.getExternalContext().getRequestParameterMap();
-		String idConfiguracion = params.get("partidaID");
-
-		//Obtenemos la plantilla seleccionada (Petición GET)
-		String url = URLs.GETCONFPARTIDA + idConfiguracion;
-		RestTemplate restTemplate = new RestTemplate();
-		ResponseEntity<ConfPartida> response = restTemplate.exchange(url, HttpMethod.GET, null,
-				new ParameterizedTypeReference<ConfPartida>() {
-				});
-		ConfPartida plantilla = response.getBody();
-		
-		//Cambiamos el id y el nombre de la plantilla
-		plantilla.setId_configuracion(-1);
-		plantilla.setTitulo(plantilla.getTitulo() + " (copia)");
-		
-		
-		//Realizamos la petición post para añadir la plantilla
-		url = URLs.NUEVACONFPARTIDA;
-		restTemplate.postForEntity(url, plantilla,null);
-
-		//Recargamos la pagina
-		this.recargarPagina();
-	}
-	
-	
 	/**
 	 * Método que recarga la interfaz actual
 	 */
@@ -564,33 +673,6 @@ public class configurarPartida implements Serializable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
-
-	public void onSelectJuego(SelectEvent event) {
-
-		this.juegoSeleccionado = (Juego) event.getObject();
-		System.out.println("Juego seleccionado: " + juegoSeleccionado.getNombre());
-		this.estiloPanelInfoJuego = visible;
-		this.estiloPanelSelectJuego = invisible;
-
-		this.setCaratulaSrc(juegoSeleccionado.getNombreZip().split("jug-")[1] + ".png");
-		this.setCapturaSrc(juegoSeleccionado.getNombreZip().split("jug-")[1] + "-cap.jpg");
-
-	}
-
-	public void resetearConfig() {
-
-		this.configSeleccionada = "-1";
-		this.titulo = "";
-		this.etapa = "";
-		this.curso = "";
-		this.asignatura = "";
-		this.tema = "";
-		this.fichero = 1;
-		this.correctas = 50;
-		this.estiloPanelInfoJuego = invisible;
-		this.estiloPanelSelectJuego = visible;
-
 	}
 
 	// Getters & Setters
