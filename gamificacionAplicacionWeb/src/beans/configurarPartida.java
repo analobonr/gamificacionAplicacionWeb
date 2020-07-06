@@ -137,6 +137,7 @@ public class configurarPartida implements Serializable {
 	/**
 	 * Método que realiza la llamada post para crear una nueva plantilla
 	 * @param plantilla Configuración de partida
+	 * @return true en caso de error false en caso contrario
 	 */
 	public boolean postPlantilla(ConfPartida plantilla) {
 		
@@ -159,6 +160,7 @@ public class configurarPartida implements Serializable {
 	/**
 	 * Método que realiza la llamada put para modificar una nueva plantilla
 	 * @param plantilla Configuración de partida
+	 * @return true en caso de error false en caso contrario
 	 */
 	public boolean putPlantilla(ConfPartida plantilla) {
 		boolean error = false;

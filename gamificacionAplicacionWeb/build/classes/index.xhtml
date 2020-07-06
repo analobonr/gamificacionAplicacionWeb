@@ -27,10 +27,10 @@
 					oncomplete="window.location.href ='./login.xhtml'" />
 
 				<p:submenu id="menu" label="Menu">
-					<p:menuitem value="Buscador de partidas" />
-					<p:menuitem value="Buscador de plantillas" />
-					<p:menuitem value="Estadísticas" />
-					<p:menuitem value="Datos personales" />
+					<p:menuitem value="Buscador de partidas" disabled="true"/>
+					<p:menuitem value="Buscador de plantillas" disabled="true"/>
+					<p:menuitem value="Estadísticas" disabled="true"/>
+					<p:menuitem value="Datos personales" disabled="true"/>
 				</p:submenu>
 
 				<f:facet name="options">
@@ -56,7 +56,7 @@
 	<div id="contenido">
 
 		<h:form>
-			<p:growl id="growl" showDetail="true" sticky="true" autoUpdate="true" />
+			
 			<!-- Datalist de Plantillas -->
 			<div id="panelLeft">
 				<p:dataList id="listaMisPartidas"
@@ -84,7 +84,7 @@
 
 							<p:commandButton id="playButton" icon="ui-icon-play"
 								actionListener="#{partidasBean.iniciarPartida}">
-								<f:param name="partidaID"
+								<f:param name="plantillaID"
 									value="#{misPartidas.id_configuracion}" />
 							</p:commandButton>
 							<p:tooltip for="playButton" value="Iniciar partida"
@@ -157,10 +157,15 @@
 							<h:outputText value="#{partidasEnCurso.titulo}" />
 						</p:column>
 						<p:column id="col2" styleClass="textoDerecha">
-							<p:button icon="ui-icon-trash" />
-							<p:commandButton icon="ui-icon-gear"
-								oncomplete="PF('confPartidaDialog').show()"></p:commandButton>
-							<p:button icon="ui-icon-play" />
+							<p:commandButton id="continueButton" icon="ui-icon-play" disabled="true"/>
+							<p:tooltip for="continueButton" value="Continuar partida"
+								position="top" />
+							<p:commandButton id="finishButton" icon="ui-icon-stop" actionListener="#{partidasBean.finalizarPartida}">
+								<f:param name="partidaID"
+									value="#{partidasEnCurso.id_partida}" />
+							</p:commandButton>
+							<p:tooltip for="finishButton" value="Finalizar partida"
+								position="top" />
 						</p:column>
 
 					</p:panelGrid>

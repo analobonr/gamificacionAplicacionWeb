@@ -30,6 +30,11 @@ public class Mensajes {
 	public static final String ERRORGETPLANTILLA = "Se ha producido un error al obtener la plantilla. Inténtelo de nuevo";
 	public static final String ERRORPOSTPLANTILLA = "Se ha producido un error al crear la plantilla. Inténtelo de nuevo";
 	public static final String ERRORPUTPLANTILLA = "Se ha producido un error al modificar la plantilla. Inténtelo de nuevo";
+	
+	//Mensajes de error - partidas
+	public static final String ERRORGETPARTIDA = "Se ha producido un error al obtener la partida. Inténtelo de nuevo";
+	public static final String ERRORPOSTPARTIDA = "Se ha producido un error al crear la partida. Inténtelo de nuevo";
+	public static final String ERRORPUTPARTIDA = "Se ha producido un error al modificar la partida. Inténtelo de nuevo";
 
 	
 	
