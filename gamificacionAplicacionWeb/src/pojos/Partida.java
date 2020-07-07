@@ -1,7 +1,5 @@
 package pojos;
 
-import java.sql.Date;
-
 public class Partida {
 	
 	private int id_partida;
