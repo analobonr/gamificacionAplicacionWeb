@@ -3,9 +3,7 @@ package beans;
 import java.io.IOException;
 
 import java.io.Serializable;
-
-import java.util.ArrayList;
-
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -29,9 +27,9 @@ import com.google.gson.Gson;
 import constantes.Mensajes;
 import constantes.URLs;
 import pojos.ConfPartida;
-import pojos.Estado;
+import pojos.Etapa;
 import pojos.Juego;
-import pojos.configuracionEquipos.Configuracion;
+
 import pojos.configuracionEquipos.Equipo;
 import pojos.configuracionEquipos.ParametrosGE;
 import pojos.configuracionEquipos.Variable;
@@ -85,6 +83,28 @@ public class configurarPartida implements Serializable {
 	private String email;
 	private Integer idProfesor;
 	private List<String> listaPrueba;
+	
+
+	// Propiedades para la lista de juegos
+	private gestionJuegosBean gestionJuegosInstance;
+	private List<Juego> juegosFiltrados;
+	
+	// Propiedades para el filtrado
+	private String[] etapasFiltro;
+	private String ilimitadasFiltro; // 0 no select, 1 tick, 2 cruz
+	private int tipoFichFiltro;
+	private String[] respuestaSelectFiltro;
+	private int minPreguntasMinimasFiltro = 0;
+	private int maxPreguntasMinimasFiltro = 100;
+	private int minFicherosMaximosFiltro = 0;
+	private int maxFicherosMaximosFiltro = 100;
+
+	private int minFicherosMinimosFiltro = 0;
+	private int maxFicherosMinimosFiltro = 100;
+	private List<Etapa> listaEtapas = constantes.valoresDesplegables.etapasJuegos;
+
+	
+
 
 	/**
 	 * Post Constructor. Se ejecuta al cargar la pagina index.xhtml
@@ -99,6 +119,14 @@ public class configurarPartida implements Serializable {
 		this.correctas = 50;
 		this.tiempoRespuesta = 10;
 		this.fichero = 1;
+		
+
+		//Inicializamos la instación de gestion de juegos bean
+		 this.setGestionJuegosInstance(new gestionJuegosBean());
+		 
+		// Obtenemos el listado de juegos existentes
+		this.juegosFiltrados = this.gestionJuegosInstance.listarJuegos();
+
 
 	}
 
@@ -269,7 +297,7 @@ public class configurarPartida implements Serializable {
 				// Convertimos los equipos en un json en string
 				Gson gson = new Gson();
 				configuracionGE = gson.toJson(this.equipos, ParametrosGE.class);
-				System.out.println(configuracionGE);
+				
 			}
 
 			//Inicializamos la configuracion
@@ -431,6 +459,77 @@ public class configurarPartida implements Serializable {
 		this.setCaratulaSrc(juegoSeleccionado.getNombreZip().split("jug-")[1] + ".png");
 		this.setCapturaSrc(juegoSeleccionado.getNombreZip().split("jug-")[1] + "-cap.jpg");
 
+	}
+	
+	/**
+	 * Método que filtra los juegos listados
+	 */
+	public void aplicarFiltros() {
+
+		// Obtenemos el listado completo de juegos
+		this.juegosFiltrados = this.gestionJuegosInstance.listarJuegos();
+
+		// Obtenemos valor del campo pregIlimitadas del filtro
+		Boolean pregIlimitadas = this.gestionJuegosInstance.setPregIlimitadas(this.ilimitadasFiltro);
+
+		// Iteramos en el listado de juegos
+		Iterator<Juego> iter = this.juegosFiltrados.iterator();
+		Juego j;
+
+		// Flag para comprobar si el elemento pasa los filtros
+		Boolean pasaFiltros = true;
+		while (iter.hasNext()) {
+
+			// Obtenemos el juego
+			j = iter.next();
+
+			// Comprobacion filtro preguntas minimas
+			if (j.getPregMin() < this.minPreguntasMinimasFiltro || j.getPregMin() > this.maxPreguntasMinimasFiltro) {
+				pasaFiltros = false;
+			}
+
+			// Comprobación filtro ficheros minimos
+			if (j.getNumFichMin() < this.minFicherosMinimosFiltro
+					|| j.getNumFichMin() > this.maxFicherosMinimosFiltro) {
+				pasaFiltros = false;
+			}
+
+			// Comprobación filtro ficheros maximos
+			if (j.getNumFichMax() < this.minFicherosMaximosFiltro
+					|| j.getNumFichMax() > this.maxFicherosMaximosFiltro) {
+				pasaFiltros = false;
+			}
+
+			// Comprobación filtro preguntas ilimitadas
+			if (pregIlimitadas != null) {
+				if (pregIlimitadas.compareTo(new Boolean(j.isPregIlimitadas())) != 0) {
+					pasaFiltros = false;
+				}
+			}
+
+			// Comprobación filtro etapa recomendada
+			if (this.etapasFiltro.length != 0) {
+				if (!this.gestionJuegosInstance.existsEtapa(this.etapasFiltro, j.getEtapa())) {
+					pasaFiltros = false;
+				}
+			}
+
+			// Comprobacion filtro forma de respuesta
+			if (this.respuestaSelectFiltro.length != 0) {
+				if (!this.gestionJuegosInstance.existsFormaRespuesta(this.respuestaSelectFiltro, j.getTipoRespuesta())) {
+					pasaFiltros = false;
+
+				}
+			}
+
+			// Si no pasa todos los filtros, eliminamos el elemento
+			if (!pasaFiltros) {
+				iter.remove();
+			}
+
+			// Reestablecemos el flag a true
+			pasaFiltros = true;
+		}
 	}
 
 	/**
@@ -860,6 +959,158 @@ public class configurarPartida implements Serializable {
 
 	public void setTiempoRespuesta(Integer tiempoRespuesta) {
 		this.tiempoRespuesta = tiempoRespuesta;
+	}
+
+	public gestionJuegosBean getGestionJuegosInstance() {
+		return gestionJuegosInstance;
+	}
+
+	public void setGestionJuegosInstance(gestionJuegosBean gestionJuegosInstance) {
+		this.gestionJuegosInstance = gestionJuegosInstance;
+	}
+
+	public String getVisible() {
+		return visible;
+	}
+
+	public void setVisible(String visible) {
+		this.visible = visible;
+	}
+
+	public String getInvisible() {
+		return invisible;
+	}
+
+	public void setInvisible(String invisible) {
+		this.invisible = invisible;
+	}
+
+	public Integer getMinimoGrupos() {
+		return minimoGrupos;
+	}
+
+	public void setMinimoGrupos(Integer minimoGrupos) {
+		this.minimoGrupos = minimoGrupos;
+	}
+
+	public Integer getMaximoGrupos() {
+		return maximoGrupos;
+	}
+
+	public void setMaximoGrupos(Integer maximoGrupos) {
+		this.maximoGrupos = maximoGrupos;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public Integer getIdProfesor() {
+		return idProfesor;
+	}
+
+	public void setIdProfesor(Integer idProfesor) {
+		this.idProfesor = idProfesor;
+	}
+
+	public List<Juego> getJuegosFiltrados() {
+		return juegosFiltrados;
+	}
+
+	public void setJuegosFiltrados(List<Juego> juegosFiltrados) {
+		this.juegosFiltrados = juegosFiltrados;
+	}
+
+	public String[] getEtapasFiltro() {
+		return etapasFiltro;
+	}
+
+	public void setEtapasFiltro(String[] etapasFiltro) {
+		this.etapasFiltro = etapasFiltro;
+	}
+
+	public String getIlimitadasFiltro() {
+		return ilimitadasFiltro;
+	}
+
+	public void setIlimitadasFiltro(String ilimitadasFiltro) {
+		this.ilimitadasFiltro = ilimitadasFiltro;
+	}
+
+	public int getTipoFichFiltro() {
+		return tipoFichFiltro;
+	}
+
+	public void setTipoFichFiltro(int tipoFichFiltro) {
+		this.tipoFichFiltro = tipoFichFiltro;
+	}
+
+	public String[] getRespuestaSelectFiltro() {
+		return respuestaSelectFiltro;
+	}
+
+	public void setRespuestaSelectFiltro(String[] respuestaSelectFiltro) {
+		this.respuestaSelectFiltro = respuestaSelectFiltro;
+	}
+
+	public int getMinPreguntasMinimasFiltro() {
+		return minPreguntasMinimasFiltro;
+	}
+
+	public void setMinPreguntasMinimasFiltro(int minPreguntasMinimasFiltro) {
+		this.minPreguntasMinimasFiltro = minPreguntasMinimasFiltro;
+	}
+
+	public int getMaxPreguntasMinimasFiltro() {
+		return maxPreguntasMinimasFiltro;
+	}
+
+	public void setMaxPreguntasMinimasFiltro(int maxPreguntasMinimasFiltro) {
+		this.maxPreguntasMinimasFiltro = maxPreguntasMinimasFiltro;
+	}
+
+	public int getMinFicherosMaximosFiltro() {
+		return minFicherosMaximosFiltro;
+	}
+
+	public void setMinFicherosMaximosFiltro(int minFicherosMaximosFiltro) {
+		this.minFicherosMaximosFiltro = minFicherosMaximosFiltro;
+	}
+
+	public int getMaxFicherosMaximosFiltro() {
+		return maxFicherosMaximosFiltro;
+	}
+
+	public void setMaxFicherosMaximosFiltro(int maxFicherosMaximosFiltro) {
+		this.maxFicherosMaximosFiltro = maxFicherosMaximosFiltro;
+	}
+
+	public int getMinFicherosMinimosFiltro() {
+		return minFicherosMinimosFiltro;
+	}
+
+	public void setMinFicherosMinimosFiltro(int minFicherosMinimosFiltro) {
+		this.minFicherosMinimosFiltro = minFicherosMinimosFiltro;
+	}
+
+	public int getMaxFicherosMinimosFiltro() {
+		return maxFicherosMinimosFiltro;
+	}
+
+	public void setMaxFicherosMinimosFiltro(int maxFicherosMinimosFiltro) {
+		this.maxFicherosMinimosFiltro = maxFicherosMinimosFiltro;
+	}
+
+	public List<Etapa> getListaEtapas() {
+		return listaEtapas;
+	}
+
+	public void setListaEtapas(List<Etapa> listaEtapas) {
+		this.listaEtapas = listaEtapas;
 	}
 
 }

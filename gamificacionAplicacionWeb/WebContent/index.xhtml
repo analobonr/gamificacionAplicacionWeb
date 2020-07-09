@@ -289,8 +289,8 @@
 							<h:panelGrid columns="2" columnClasses="grid, grid">
 								<h:panelGrid columns="1">
 									<p:orderList id="juegoList"
-										value="#{buscadorJuegosBean.juegosFiltrados}" var="Juego"
-										itemValue="#{Juego}" converter="juegoConverter"
+										value="#{configurarPartida.juegosFiltrados}" var="Juego"
+										itemValue="#{Juego}" converter="juegoConverterGestion"
 										controlsLocation="none" responsive="true">
 										<p:ajax event="select"
 											listener="#{configurarPartida.onSelectJuego}"
@@ -302,81 +302,98 @@
 										</p:column>
 									</p:orderList>
 								</h:panelGrid>
-								<h:panelGrid columns="2" columnClasses="grid, grid">
-									<h:panelGrid columns="2" columnClasses="label, value">
-										<p:triStateCheckbox value="#{buscadorJuegosBean.ilimitadas}"
-											itemLabel="Preguntas ilimitadas" onchange="rc()" />
-										<br />
-										<p:outputLabel for="respuesta" value="Forma de respuesta: " />
-										<p:selectCheckboxMenu id="respuesta"
-											value="#{buscadorJuegosBean.respuestaSelect}" multiple="true"
-											onchange="rc()">
-											<f:selectItem itemLabel="Sin respuesta" itemValue="0"></f:selectItem>
-											<f:selectItem itemLabel="Respuestas con opciones (A,B,C,...)"
-												itemValue="1"></f:selectItem>
-											<f:selectItem itemLabel="Cifras" itemValue="2"></f:selectItem>
-											<f:selectItem itemLabel="Campos de texto" itemValue="3"></f:selectItem>
-											<f:selectItem itemLabel="Respuestas de relacionar"
-												itemValue="4"></f:selectItem>
-										</p:selectCheckboxMenu>
+								<p:fieldset legend="Filtrar" toggleable="true" toggleSpeed="500">
+					<p:panelGrid id="pgForm" styleClass="ui-noborder tablaFiltrado">
+						<p:remoteCommand name="rcFiltros" update="juegoList"
+							actionListener="#{configurarPartida.aplicarFiltros}"
+							process="pgForm" />
+						<h:form inline="true">
+							<p:row>
+								<p:column colspan="1" styleClass="columnasFiltrado">
+									<p:triStateCheckbox
+										value="#{configurarPartida.ilimitadasFiltro}"
+										itemLabel="Preguntas ilimitadas" onchange="rcFiltros()" />
 
-										<p:outputLabel for="etapa2" value="Etapa recomendada:" />
-										<p:selectCheckboxMenu id="etapa2"
-											value="#{buscadorJuegosBean.etapasSeleccionadas}" label="e"
-											multiple="true" onchange="rc()" updateLabel="true">
-											<f:selectItems value="#{buscadorJuegosBean.etapas}" var="e"
-												itemLabel="#{e.descripcion}" itemValue="#{e.id}" />
-										</p:selectCheckboxMenu>
+								</p:column>
 
-									</h:panelGrid>
+								
+								<p:column colspan="1" styleClass="columnasFiltrado">
 
-									<h:panelGrid columns="2" columnClasses="label, value">
-										<p:outputLabel for="jugadores" value="Mínimo de jugadores:" />
-										<h:panelGrid id="jugadores" columns="1"
-											style="margin-bottom: 10px">
-											<h:outputText id="displayRange"
-												value="Desde #{buscadorJuegosBean.minJugadores} hasta #{buscadorJuegosBean.maxJugadores}" />
-											<p:slider for="minJug,maxJug" display="displayRange"
-												style="width: 400px" range="true"
-												displayTemplate="Desde {min} hasta {max} minimo de jugadores"
-												disabled="true" onSlideEnd="rc()" />
-										</h:panelGrid>
-										<h:inputHidden id="minJug"
-											value="#{buscadorJuegosBean.minJugadores}" />
-										<h:inputHidden id="maxJug"
-											value="#{buscadorJuegosBean.maxJugadores}" />
+									<p:outputLabel for="minPregmin" value="Mínimo de preguntas:" />
+									<p:spinner id="minPregmin"
+										value="#{configurarPartida.minPreguntasMinimasFiltro}" min="0"
+										max="100" onchange="rcFiltros()" />
+									<p:outputLabel value="  -  " />
+									<p:spinner id="maxPregmin"
+										value="#{configurarPartida.maxPreguntasMinimasFiltro}" min="0"
+										max="100" onchange="rcFiltros()" />
 
-										<p:outputLabel for="preguntasMin" value="Mínimo de preguntas:" />
-										<h:panelGrid id="preguntasMin" columns="1"
-											style="margin-bottom: 10px">
-											<h:outputText id="displayRangepmin"
-												value="Desde #{buscadorJuegosBean.minPreguntasMinimas} hasta #{buscadorJuegosBean.maxPreguntasMinimas}" />
-											<p:slider for="minPregm,maxPregm" display="displayRangepmin"
-												style="width: 400px" range="true"
-												displayTemplate="Desde {min} hasta {max} mínimo de preguntas"
-												onSlideEnd="rc()" />
-										</h:panelGrid>
-										<h:inputHidden id="minPregm"
-											value="#{buscadorJuegosBean.minPreguntasMinimas}" />
-										<h:inputHidden id="maxPregm"
-											value="#{buscadorJuegosBean.maxPreguntasMinimas}" />
+								</p:column>
+								
+								<p:column colspan="1" styleClass="columnasFiltrado">
 
-										<p:outputLabel for="preguntasMax" value="Máximo de preguntas:" />
-										<h:panelGrid id="preguntasMax" columns="1"
-											style="margin-bottom: 10px">
-											<h:outputText id="displayRangepMax"
-												value="Desde #{buscadorJuegosBean.minPreguntasMaximas} hasta #{buscadorJuegosBean.maxPreguntasMaximas}" />
-											<p:slider for="minPregM,maxPregM" display="displayRangepMax"
-												style="width: 400px" range="true"
-												displayTemplate="Desde {min} hasta {max} máximo de preguntas"
-												disabled="true" onSlideEnd="rc()" />
-										</h:panelGrid>
-										<h:inputHidden id="minPregM"
-											value="#{buscadorJuegosBean.minPreguntasMaximas}" />
-										<h:inputHidden id="maxPregM"
-											value="#{buscadorJuegosBean.maxPreguntasMaximas}" />
-									</h:panelGrid>
-								</h:panelGrid>
+									<p:outputLabel for="minFichMin" value="Mínimo de ficheros:" />
+									<p:spinner id="minFichMin"
+										value="#{configurarPartida.minFicherosMinimosFiltro}" min="0"
+										max="100" onchange="rcFiltros()" />
+									<p:outputLabel value="  -  " />
+									<p:spinner id="maxFichMin"
+										value="#{configurarPartida.maxFicherosMinimosFiltro}" min="0"
+										max="100" onchange="rcFiltros()" />
+
+								</p:column>
+								
+								<p:column colspan="1" styleClass="columnasFiltrado">
+
+									<p:outputLabel for="minFichMax" value="Máximo de ficheros:" />
+									<p:spinner id="minFichMax"
+										value="#{configurarPartida.minFicherosMaximosFiltro}" min="0"
+										max="100" onchange="rcFiltros()" />
+									<p:outputLabel value="  -  " />
+									<p:spinner id="maxFichMax"
+										value="#{configurarPartida.maxFicherosMaximosFiltro}" min="0"
+										max="100" onchange="rcFiltros()" />
+
+								</p:column>
+								
+								
+
+
+							</p:row>
+						</h:form>
+
+						<p:row>
+							<p:column colspan="2">
+
+								<p:outputLabel for="respuesta" value="Forma de respuesta: " />
+								<p:selectCheckboxMenu id="respuesta"
+									value="#{configurarPartida.respuestaSelectFiltro}"
+									multiple="true" onchange="rcFiltros()"
+									styleClass="tablaFiltrado">
+									<f:selectItem itemLabel="Sin respuesta" itemValue="0"></f:selectItem>
+									<f:selectItem itemLabel="Respuestas con opciones (A,B,C,...)"
+										itemValue="1"></f:selectItem>
+									<f:selectItem itemLabel="Cifras" itemValue="2"></f:selectItem>
+									<f:selectItem itemLabel="Campos de texto" itemValue="3"></f:selectItem>
+									<f:selectItem itemLabel="Respuestas de relacionar"
+										itemValue="4"></f:selectItem>
+								</p:selectCheckboxMenu>
+							</p:column>
+
+							<p:column colspan="2">
+								<p:outputLabel for="etapa2" value="Etapa recomendada:" />
+								<p:selectCheckboxMenu id="etapa2"
+									value="#{configurarPartida.etapasFiltro}" label="e"
+									multiple="true" onchange="rcFiltros()"
+									styleClass="tablaFiltrado" updateLabel="true">
+									<f:selectItems value="#{configurarPartida.listaEtapas}" var="e"
+										itemLabel="#{e.descripcion}" itemValue="#{e.id}" />
+								</p:selectCheckboxMenu>
+							</p:column>
+
+						</p:row>
+					</p:panelGrid>
+				</p:fieldset>
 
 							</h:panelGrid>
 
@@ -384,7 +401,7 @@
 						</p:panel>
 					</div>
 					<p:remoteCommand name="rc" update="juegoList"
-						actionListener="#{buscadorJuegosBean.aplicarFiltros}" />
+						actionListener="#{configurarPartida.aplicarFiltros}" />
 
 
 				</p:tab>

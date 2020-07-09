@@ -483,8 +483,6 @@ public class gestionJuegosBean implements Serializable {
 	 */
 	public void aplicarFiltros() {
 
-		System.out.println("Aplicar filtros");
-
 		// Obtenemos el listado completo de juegos
 		this.juegosFiltrados = this.listarJuegos();
 
@@ -556,7 +554,7 @@ public class gestionJuegosBean implements Serializable {
 	 * 
 	 * @return String de etapas recomendadas separadas mediante un '-'
 	 */
-	private String etapasToString() {
+	public String etapasToString() {
 		String e = "";
 		for (String i : etapasSeleccionadas) {
 			if (e == "") {
@@ -578,7 +576,7 @@ public class gestionJuegosBean implements Serializable {
 	 * @param etapasString String de etapas
 	 * @return Array de string donde cada elemento se corresponde con una etapa
 	 */
-	private String[] etapasToArray(String etapasString) {
+	public String[] etapasToArray(String etapasString) {
 		return etapasString.split("-");
 	}
 
@@ -589,7 +587,7 @@ public class gestionJuegosBean implements Serializable {
 	 * @return Estado de ilimitadas. True si está activo, False inactivo y null si
 	 *         no está marcado
 	 */
-	private Boolean setPregIlimitadas(String ilimitadas) {
+	public Boolean setPregIlimitadas(String ilimitadas) {
 
 		Boolean pregIlimitadas = null;
 		if (ilimitadas != null) {
@@ -611,7 +609,7 @@ public class gestionJuegosBean implements Serializable {
 	 * @param etapasJuego  String de etapas de un juego
 	 * @return True si el filtro coincide y false en caso contrario
 	 */
-	private boolean existsEtapa(String[] etapasFiltro, String etapasJuego) {
+	public boolean existsEtapa(String[] etapasFiltro, String etapasJuego) {
 
 		boolean existe = false;
 
@@ -634,7 +632,7 @@ public class gestionJuegosBean implements Serializable {
 	 * @param tipoRespuesta    Identificador del tipo de respuesta
 	 * @return True si existe, false en caso contrario
 	 */
-	private boolean existsFormaRespuesta(String[] respuestasFiltro, int tipoRespuesta) {
+	public boolean existsFormaRespuesta(String[] respuestasFiltro, int tipoRespuesta) {
 
 		boolean existe = false;
 
