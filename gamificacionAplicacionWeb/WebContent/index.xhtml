@@ -290,7 +290,7 @@
 								<h:panelGrid columns="1">
 									<p:orderList id="juegoList"
 										value="#{configurarPartida.juegosFiltrados}" var="Juego"
-										itemValue="#{Juego}" converter="juegoConverterGestion"
+										itemValue="#{Juego}" converter="juegoConverter"
 										controlsLocation="none" responsive="true">
 										<p:ajax event="select"
 											listener="#{configurarPartida.onSelectJuego}"
