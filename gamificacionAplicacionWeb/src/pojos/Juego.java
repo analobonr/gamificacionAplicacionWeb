@@ -1,10 +1,14 @@
 package pojos;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonParser;
+
 import constantes.valoresDesplegables.estilosJuego_t;
+import pojos.configuracionEquipos.ParametrosGE;
 
 public class Juego {
 
-	private int idJuego;
+	private int id_juego;
 	private String nombre;
 	private String descripcion;
 	private String etapa;
@@ -32,7 +36,7 @@ public class Juego {
 			String jsonRespuestas, String JSONparametrosConf, String JSONequipos, String JSONotrosDatos,
 			String nombreZip, String rutaZip) {
 
-		this.setIdJuego(-1);
+		this.setId_juego(-1);
 		this.setNombre(nombre);
 		this.setDescripcion(descripcion);
 		this.setEtapa(etapa);
@@ -54,9 +58,7 @@ public class Juego {
 
 	}
 
-	public int getIdJuego() {
-		return idJuego;
-	}
+
 
 	public String getNombre() {
 		return nombre;
@@ -99,9 +101,7 @@ public class Juego {
 		return cargaCompleta;
 	}
 
-	public void setIdJuego(int idJuego) {
-		this.idJuego = idJuego;
-	}
+
 
 	public void setNombre(String nombre) {
 		this.nombre = nombre;
@@ -203,4 +203,12 @@ public class Juego {
 		this.jsonOtrosDatos = jsonOtrosDatos;
 	}
 
+	public int getId_juego() {
+		return id_juego;
+	}
+
+	public void setId_juego(int id_juego) {
+		this.id_juego = id_juego;
+	}
+	
 }

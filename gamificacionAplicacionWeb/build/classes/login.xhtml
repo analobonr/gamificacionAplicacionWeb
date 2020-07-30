@@ -5,104 +5,156 @@
 
 <h:head>
 	<title>Login</title>
-	<h:outputStylesheet library="css" name="miEstilo.css"/>
-	<h:outputStylesheet library="css" name="login.css"/>
+	<h:outputStylesheet library="css" name="general.css" />
+	<h:outputStylesheet library="css" name="login.css" />
 </h:head>
 
 <h:body id="loginBody" style="height:500px;">
-	<p:growl id="growl" showDetail="true" sticky="true"/>
-	<p:panel id="panelBar" >
-		<h1 id="cabecera" style="color:white;">Aplicación de Administración de Juegos</h1>
+
+	<!-- Growl para notificar errores o dar informacion -->
+	<p:growl id="growl" showDetail="true" sticky="true" />
+	
+	<!-- Cabecera -->
+	<p:panel id="panelBar">
+		<h1 id="cabecera" style="color: white;">Aplicación de
+			Administración de Juegos</h1>
+		
+		<!-- Formulario de login -->
 		<h:form>
 			<p:panelGrid styleClass="ui-panelgrid-blank">
-				<p:row style="color:white;"> 
-					<p:column><p:outputLabel value="Email: " /></p:column>
-					<p:column><h:outputText value="Contraseña: " /></p:column>
+			
+				<!-- Primera fila: Etiquetas de email y contrasena -->
+				<p:row style="color:white;">
+					<p:column>
+						<p:outputLabel value="Email: " />
+					</p:column>
+					<p:column>
+						<h:outputText value="Contraseña: " />
+					</p:column>
+				</p:row>
+
+				<!-- Segunda fila -->
+				<p:row style="color:white;">
+				
+					<!-- Inputs de email y contrasena -->
+					<p:column>
+						<p:inputText value="#{loginBean.email}" />
+					</p:column>
+					<p:column>
+						<p:password value="#{loginBean.password}" />
+					</p:column>
+					
+					
+					<!-- Boton de entra y boton para registrarse -->
+					<p:column>
+						<p:commandButton value="Entrar" update="growl"
+							action="#{loginBean.enviarDatos}" />
+						<p:column>
+							<p:commandLink value="Registrarse"
+								oncomplete="PF('registroDialog').show()" />
+						</p:column>
+					</p:column>
 				</p:row>
 				
-				<p:row style="color:white;">
-					<p:column><p:inputText value="#{loginBean.email}" /></p:column>
-					<p:column><p:password value="#{loginBean.password}" /></p:column>
+				<!-- Tercera fila: boton para recordar contrasena -->
+				<p:row>
 					<p:column>
-						<p:commandButton value="Entrar" update="growl" action="#{loginBean.enviarDatos}" />
-						<p:column><p:commandLink  value="Registrarse" oncomplete="PF('registroDialog').show()"/></p:column>
-					</p:column> 
-				</p:row>
-				<p:row >
-					<p:column><p:commandLink value="Recordar contraseña" action="#{loginBean.enviarEmail}" update="growl"></p:commandLink></p:column>
+						<p:commandLink value="¿Olvidó su contraseña?"
+							action="#{loginBean.enviarEmail}" update="growl"></p:commandLink>
+					</p:column>
 				</p:row>
 			</p:panelGrid>
 		</h:form>
 	</p:panel>
-	
 
-		<p:panel id="panelInfo">
-	        
-	        <p>Aplicación de juegos didácticos en el aula es un proyecto que pone al servicio de la comunidad educativa una amplia colección de juegos 
-	        con el objetivo de que sirvan como recursos didácticos de aplicación en el aula.
-	        </p>
-	        <p> Los aspectos educativos más significativos a los que puede contribuir positivamente el proyecto AJDA son:</p>
-			<ul>
-				<li>Utilización de una metodología activa, participativa y altamente motivadora.</li>
-			
-			    <li>Mejora en la adquisición de competencias y desarrollo del curriculum de cualquier área o materia.</li>
-			
-			    <li>Se pueden realizar Unidades Didácticas Integradas UDI basadas en juegos didácticos.</li>
-			
-			   <li> Recurso para la atención individualizada y a la diversidad.</li>
-			
-			    <li>Ayuda a la mejora de la convivencia.</li>
-			
-			    <li>Integración e inclusión efectiva de las TICs en el aula.</li>
-			
-			    <li>Útil herramienta de evaluación.</li>
-			
-			    <li>Aplicables a cualquier etapa educativa y a cualquier área o materia.</li>
-			
-			    <li>Juegos fáciles de usar. Están basados en concursos de televisión ("Boom, "Atrapa un millón", "Ahora caigo", "Pasapalabra", 
-			    "Saber y Ganar", "Password", "¿Quién quiere ser millonario?", "La ruleta de la fortuna", "Avanti", "Alta tensión", "Identity"...),
-			     juegos clásicos y populares ("Ahorcado", "Tabú", "Minitrivial", "Pseudotrivial", "Minirisk", "Minipoly", "Oca", "Hundir la flota", 
-			     "Tres en raya", "Chinos"...) y juegos originales de nueva creación ("Batalla de tanques", "El superviviente", "Elecciones", "Excálibur", 
-			     "Subasta", "La caja fuerte", "Liguilla", "La planta", "Caritas", "Puente", "Roba los puntos" ...). </li>
-				        
-			
-			</ul>
-    
-   		</p:panel>
-   	
-	
-	
-	<p:dialog id="registro" modal="true" showEffect="fade" hideEffect="fade" widgetVar="registroDialog" header="Registro">
-        	
-        	
-        	<h:form>
-	        	<p:panelGrid id="registroPanel" columns="2" layout="grid" styleClass="ui-panelgrid-blank">	
-		   			<p:outputLabel for="rNombre" value="Nombre:"/>
-		   			<p:inputText id="rNombre" required="true" value="#{RegistroBean.nombre}" />
-		   		
-		   			<p:outputLabel value="Apellidos:"/>
-		   			<p:inputText value="#{RegistroBean.apellidos}" />
-		   		
-			   		<p:outputLabel value="País:"/>
-			   		<p:inputText value="#{RegistroBean.pais}" />
-			   		
-			   		<p:outputLabel for="rEmail" value="Correo electrónico (login):"/>
-			   		<p:inputText id="rEmail" required="true" value="#{RegistroBean.email}" />
-			   		
-			   		<p:outputLabel for="rPass" value="Contraseña: " />
-					<p:password id="rPass" required="true" match="rPass2" value="#{RegistroBean.password}" validatorMessage="La contraseña debe tener al menos 8 caracteres y ambas contraseñas deben coincidir">
-						 <f:validateLength minimum="8"/>
-					</p:password>
-					
-					<p:outputLabel for="rPass2" value="Repetir contraseña: " />
-					<p:password id="rPass2" required="true" value="#{RegistroBean.password}" />
-					
-		        </p:panelGrid>
-		
-		        <p:commandButton value="Registrar" action="#{RegistroBean.registrar}" update="growl"></p:commandButton>    
-			    <p:commandButton value="Cancelar" oncomplete="PF('registroDialog').hide()"></p:commandButton>    
-		        
-	        </h:form>
+	<!-- Cuerpo: informacion de interes -->
+	<p:panel id="panelInfo">
+
+		<p>Aplicación de juegos didácticos en el aula es un proyecto que
+			pone al servicio de la comunidad educativa una amplia colección de
+			juegos con el objetivo de que sirvan como recursos didácticos de
+			aplicación en el aula.</p>
+		<p>Los aspectos educativos más significativos a los que puede
+			contribuir positivamente el proyecto AJDA son:</p>
+		<ul>
+			<li>Utilización de una metodología activa, participativa y
+				altamente motivadora.</li>
+
+			<li>Mejora en la adquisición de competencias y desarrollo del
+				curriculum de cualquier área o materia.</li>
+
+			<li>Se pueden realizar Unidades Didácticas Integradas UDI
+				basadas en juegos didácticos.</li>
+
+			<li>Recurso para la atención individualizada y a la diversidad.</li>
+
+			<li>Ayuda a la mejora de la convivencia.</li>
+
+			<li>Integración e inclusión efectiva de las TICs en el aula.</li>
+
+			<li>Útil herramienta de evaluación.</li>
+
+			<li>Aplicables a cualquier etapa educativa y a cualquier área o
+				materia.</li>
+
+			<li>Juegos fáciles de usar. Están basados en concursos de
+				televisión ("Boom, "Atrapa un millón", "Ahora caigo", "Pasapalabra",
+				"Saber y Ganar", "Password", "¿Quién quiere ser millonario?", "La
+				ruleta de la fortuna", "Avanti", "Alta tensión", "Identity"...),
+				juegos clásicos y populares ("Ahorcado", "Tabú", "Minitrivial",
+				"Pseudotrivial", "Minirisk", "Minipoly", "Oca", "Hundir la flota",
+				"Tres en raya", "Chinos"...) y juegos originales de nueva creación
+				("Batalla de tanques", "El superviviente", "Elecciones",
+				"Excálibur", "Subasta", "La caja fuerte", "Liguilla", "La planta",
+				"Caritas", "Puente", "Roba los puntos" ...).</li>
+
+
+		</ul>
+
+	</p:panel>
+
+
+	<!-- Dialogo de registro de nuevo usuario -->
+	<p:dialog id="registro" modal="true" showEffect="fade"
+		hideEffect="fade" widgetVar="registroDialog" header="Registro">
+
+
+		<h:form>
+			<p:panelGrid id="registroPanel" columns="2" layout="grid"
+				styleClass="ui-panelgrid-blank">
+				<p:outputLabel for="rNombre" value="Nombre:" />
+				<p:inputText id="rNombre" required="true"
+					value="#{RegistroBean.nombre}" />
+
+				<p:outputLabel value="Apellidos:" />
+				<p:inputText value="#{RegistroBean.apellidos}" />
+
+				<p:outputLabel value="País:" />
+				<p:inputText value="#{RegistroBean.pais}" />
+
+				<p:outputLabel for="rEmail" value="Correo electrónico (login):" />
+				<p:inputText id="rEmail" required="true"
+					value="#{RegistroBean.email}" />
+
+				<p:outputLabel for="rPass" value="Contraseña: " />
+				<p:password id="rPass" required="true" match="rPass2"
+					value="#{RegistroBean.password}"
+					validatorMessage="La contraseña debe tener al menos 8 caracteres y ambas contraseñas deben coincidir">
+					<f:validateLength minimum="8" />
+				</p:password>
+
+				<p:outputLabel for="rPass2" value="Repetir contraseña: " />
+				<p:password id="rPass2" required="true"
+					value="#{RegistroBean.password}" />
+
+			</p:panelGrid>
+
+			<p:commandButton value="Registrar" action="#{RegistroBean.registrar}"
+				update="growl"></p:commandButton>
+			<p:commandButton value="Cancelar"
+				oncomplete="PF('registroDialog').hide()"></p:commandButton>
+
+		</h:form>
 	</p:dialog>
 </h:body>
 </html>

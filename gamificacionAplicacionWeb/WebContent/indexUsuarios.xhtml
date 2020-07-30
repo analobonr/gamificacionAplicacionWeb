@@ -5,167 +5,254 @@
 
 <h:head>
 	<title>Menu</title>
-	<h:outputStylesheet library="css" name="miEstilo.css"/>
-	<h:outputStylesheet library="css" name="adminUsuarios.css"/>
+	<h:outputStylesheet library="css" name="general.css" />
+	<h:outputStylesheet library="css" name="adminUsuarios.css" />
 </h:head>
 
-<h:body id="general"> 
 
-	<div id="divTop">   
-	 
+<h:body id="general">
+
+	<!-- Cabecera -->
+	<div id="divTop">
+
+		<!-- Menu superior -->
 		<h:form>
 			<p:menubar id="menubar" styleClass="resaltar1">
-		 
-		    
-		    	<p:menuitem id="home" cssClass="estiloHome" url="/index.xhtml">
-		    		<img src="logoADJA.png" alt="AJDA" width="75" height="50"/>
-		    	</p:menuitem>
-		    
-        	
-        	<p:menuitem id="salir" icon="ui-icon-extlink" actionListener="#{loginBean.cerrarSesion}" oncomplete="window.location.href ='./login.xhtml'"/>
-        	
-        	<p:submenu id="menu" label="Menu" >
-	            <p:menuitem value="Buscador de partidas" />
-	            <p:menuitem value="Buscador de plantillas" />
-	            <p:menuitem value="Estadísticas"  />
-	            <p:menuitem value="Datos personales"/>
-        	</p:submenu>
-        	
-        	<f:facet name="options">
-		        <p:outputLabel value="¡Bienvenid@, "></p:outputLabel>
-		        <p:outputLabel value="#{loginBean.p.nombre}"></p:outputLabel>
-		        <p:outputLabel value="!"></p:outputLabel>
-		      
-		    </f:facet>
-		    
-		    <p:menuitem id="menuJuegos" value="Juegos" icon="ui-icon-gear" url="/indexJuegos.xhtml" rendered="#{loginBean.p.rol != 'USER'}"/>
-		    <p:menuitem id="menuUsuarios" value="Usuarios" icon="ui-icon-gear" url="/indexUsuarios.xhtml" rendered="#{loginBean.p.rol == 'SUPER'}"/>
-	    
-        	
+
+				<p:menuitem id="home" cssClass="estiloHome" url="/index.xhtml">
+					<img src="logoADJA.png" alt="AJDA" width="75" height="50" />
+				</p:menuitem>
+
+				<p:menuitem id="salir" icon="ui-icon-extlink"
+					actionListener="#{loginBean.cerrarSesion}"
+					oncomplete="window.location.href ='./login.xhtml'" />
+
+				<p:submenu id="menu" label="Menu">
+					<p:menuitem value="Buscador de partidas" disabled="true"/>
+					<p:menuitem value="Buscador de plantillas" disabled="true"/>
+					<p:menuitem value="Estadísticas" disabled="true"/>
+					<p:menuitem value="Datos personales" disabled="true"/>
+				</p:submenu>
+
+				<f:facet name="options">
+					<p:outputLabel value="¡Bienvenid@, "></p:outputLabel>
+					<p:outputLabel value="#{loginBean.p.nombre}"></p:outputLabel>
+					<p:outputLabel value="!"></p:outputLabel>
+					<p:outputLabel id="rol" value="#{loginBean.rolUsuario}"></p:outputLabel>
+
+				</f:facet>
+
+				<p:menuitem id="menuJuegos" value="Juegos" icon="ui-icon-gear"
+					url="/indexJuegos.xhtml" rendered="#{loginBean.p.rol != 'USER'}" />
+
+				<p:menuitem id="menuUsuarios" value="Usuarios" icon="ui-icon-gear"
+					url="/indexUsuarios.xhtml" rendered="#{loginBean.p.rol == 'SUPER'}" />
+
+
 			</p:menubar>
 		</h:form>
-	
+
 	</div>
-	
-	
+
+
 	<div id="contenido">
+
 		
-		
+	
+		<!-- Contenido principal -->
 		<h:form id="formTabla">
-		<p:commandButton value="Nuevo usuario" oncomplete="PF('registroDialog').show()" />
-		<p:commandButton process="@this formTabla:tabla" update="formTabla:tabla" icon="ui-icon-trash" actionListener="#{gestionUsuariosBean.eliminarProfesor()}" ajax="true">
-		 		<p:confirm header="Confirmación" message="¿Está seguro que desea eliminar el/los usuarios seleccionados?" icon="ui-icon-alert" />
-		 </p:commandButton>
-			<p:dataTable id="tabla" var="user" value="#{gestionUsuariosBean.users}" widgetVar="usersTable"
-                 emptyMessage="No se han encontrado resultados" filteredValue="#{gestionUsuariosBean.filteredUsers}" 
-                 responsive="true" sortBy="#{user.email}" editable="true"
-                 selection="#{gestionUsuariosBean.selectedUsers}" rowKey="#{user.id}">
-            	
-            	 <p:ajax event="rowEdit" listener="#{gestionUsuariosBean.modificar(user)}"/>
-		 		<p:column selectionMode="multiple" style="width:16px;text-align:center">
-		 		
-		 		
-		 		</p:column>
-		        <p:column filterBy="#{user.email}" headerText="Email" style="width:15%;">
-		        	<p:cellEditor>
-		        		 <f:facet name="output"><h:outputText value="#{user.email}"/></f:facet>
-                		 <f:facet name="input"><p:inputText value="#{user.email}" style="width:100%"/></f:facet>
-		            </p:cellEditor>
-		        </p:column>
-		 
-		        <p:column headerText="Contraseña">
-		            <h:outputText value="#{user.password}"/>
-		        </p:column>
-		        
-		        <p:column filterBy="#{user.nombre}" headerText="Nombre">
-		            <p:cellEditor>
-		        		 <f:facet name="output"><h:outputText value="#{user.nombre}" /></f:facet>
-                		 <f:facet name="input"><p:inputText value="#{user.nombre}" style="width:100%"/></f:facet>
-		            </p:cellEditor>
-		        </p:column>
-		        
-		        <p:column filterBy="#{user.apellidos}" headerText="Apellidos">		            
-		            <p:cellEditor>
-		        		 <f:facet name="output"><h:outputText value="#{user.apellidos}"/></f:facet>
-                		 <f:facet name="input"><p:inputText value="#{user.apellidos}" style="width:100%"/></f:facet>
-		            </p:cellEditor>
-		        </p:column>
-		        
-		        <p:column filterBy="#{user.pais}" headerText="País">
-		            <p:cellEditor>
-		        		 <f:facet name="output"><h:outputText value="#{user.pais}"/></f:facet>
-                		 <f:facet name="input"><p:inputText value="#{user.pais}" style="width:100%"/></f:facet>
-		            </p:cellEditor>
-		        </p:column>
-		        
-		        <p:column  headerText="Rol"  filterMatchMode="in" filterBy="#{user.rolToString}">
-		        	<f:facet name="filter">
-		        		<p:selectCheckboxMenu onchange="PF('usersTable').filter()" styleClass="custom-filter" label="Roles">
-                   			<f:selectItems value="#{gestionUsuariosBean.rolesList}" />
-               			 </p:selectCheckboxMenu>
-		 
-		            </f:facet>
-		            
-		            <p:cellEditor>
-	                	<f:facet name="output"><h:outputText value="#{user.rolToString}"/></f:facet>
-	                	<f:facet name="input">
-	               			 <h:selectOneMenu value="#{user.rolToString}" style="width:100%">
-                        		<f:selectItems value="#{gestionUsuariosBean.rolesList}" var="color" itemLabel="#{color}" itemValue="#{color}" />
-                    		</h:selectOneMenu>
-	                	</f:facet>
-            		</p:cellEditor>
-		        </p:column>
-		        
-		        <p:column filterBy="#{user.f_ultimo_acceso}" headerText="Último acceso" style="width:10%;">
-		        	<h:outputText value="#{user.f_ultimo_acceso}"/>
-		        </p:column>
-		        
-		        <p:column style="width:35px">
-            		<p:rowEditor />
-        		</p:column>
-		        
-		  	
-		    </p:dataTable>
-			<p:confirmDialog global="true">
-							        <p:commandButton value="Si" type="button" styleClass="ui-confirmdialog-yes" icon=" ui-icon-check" />
-							        <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
-							    </p:confirmDialog> 
-		</h:form>	
-		
-		<p:dialog id="registro" modal="true" showEffect="fade" hideEffect="fade" widgetVar="registroDialog" header="Nuevo Usuario" closeOnEscape="true" responsive="false">
-        	
-        	<p:messages id="messages" showDetail="true" autoUpdate="true" />
-        	<h:form>
-	        	<p:panelGrid id="registroPanel" columns="2" layout="grid">	
-		   			<p:outputLabel for="rNombre" value="Nombre:"/>
-		   			<p:inputText id="rNombre" required="true" value="#{RegistroBean.nombre}" />
-		   		
-		   			<p:outputLabel value="Apellidos:"/>
-		   			<p:inputText value="#{RegistroBean.apellidos}" />
-		   		
-			   		<p:outputLabel value="País:"/>
-			   		<p:inputText value="#{RegistroBean.pais}" />
-			   		
-			   		<p:outputLabel for="rEmail" value="Correo electrónico (login):"/>
-			   		<p:inputText id="rEmail" required="true" value="#{RegistroBean.email}" />
+			<p:growl id="growl" showDetail="true" sticky="true" life="5000"/> 
+			<div style="display: flow-root;">
+			
+				<!-- Boton eliminar usuarios -->
+				<p:commandButton id="deleteUsers" process="@this formTabla:tabla"
+					update="@form" icon="ui-icon-trash"
+					actionListener="#{gestionUsuariosBean.eliminarProfesor()}"
+					ajax="true" style="float: right;">
 					
+					<!-- Modal de confirmacion -->
+					<p:confirm header="Confirmación"
+						message="¿Está seguro que desea eliminar el/los usuarios seleccionados?"
+						icon="ui-icon-alert" />
+				</p:commandButton>
+				
+				<!-- Tooltip del boton eliminar usuarios -->
+				<p:tooltip for="deleteUsers" value="Eliminar usuarios seleccionados"
+					position="top" />
+				
+				<!-- Boton nuevo usuario -->
+				<p:commandButton id="addUser" icon="ui-icon-plus"
+					oncomplete="PF('registroDialog').show()" style="float: right;" />
+					
+				<!-- Tooltip del boton nuevo usuario -->
+				<p:tooltip for="addUser" value="Nuevo usuario" position="top" />
+			</div>
+			
+			
+			<!-- Tabla gestion de usuarios -->
+			<p:dataTable id="tabla" var="user"
+				value="#{gestionUsuariosBean.users}" widgetVar="usersTable"
+				emptyMessage="No se han encontrado resultados"
+				filteredValue="#{gestionUsuariosBean.filteredUsers}"
+				responsive="true" sortBy="#{user.email}" editable="true"
+				selection="#{gestionUsuariosBean.selectedUsers}" rowKey="#{user.id}">
+
+				<!-- Evento ajax para editar un usuario -->
+				<p:ajax event="rowEdit"
+					listener="#{gestionUsuariosBean.modificar(user)}" />
+					
+				<!-- Columnas con checkbox de seleccion multiple -->
+				<p:column selectionMode="multiple"
+					style="width:16px;text-align:center">
+				</p:column>
+				
+				<!-- Columna email con filtrado y editado -->
+				<p:column filterBy="#{user.email}" headerText="Email"
+					style="width:15%;">
+					<p:cellEditor>
+						<f:facet name="output">
+							<h:outputText value="#{user.email}" />
+						</f:facet>
+						<f:facet name="input">
+							<p:inputText value="#{user.email}" style="width:100%" required="true"/>
+						</f:facet>
+					</p:cellEditor>
+				</p:column>
+
+				<!-- Columna contraseña -->
+				<p:column headerText="Contraseña">
+					<h:outputText value="#{user.password}" />
+				</p:column>
+
+				<!-- Columna nombre con filtrado y editado -->
+				<p:column filterBy="#{user.nombre}" headerText="Nombre">
+					<p:cellEditor>
+						<f:facet name="output">
+							<h:outputText value="#{user.nombre}" />
+						</f:facet>
+						<f:facet name="input">
+							<p:inputText value="#{user.nombre}" style="width:100%" />
+						</f:facet>
+					</p:cellEditor>
+				</p:column>
+
+				<!-- Columna apellidos con filtrado y editado -->
+				<p:column filterBy="#{user.apellidos}" headerText="Apellidos">
+					<p:cellEditor>
+						<f:facet name="output">
+							<h:outputText value="#{user.apellidos}" />
+						</f:facet>
+						<f:facet name="input">
+							<p:inputText value="#{user.apellidos}" style="width:100%" />
+						</f:facet>
+					</p:cellEditor>
+				</p:column>
+
+				<!-- Columna pais con filtrado y editado -->
+				<p:column filterBy="#{user.pais}" headerText="País">
+					<p:cellEditor>
+						<f:facet name="output">
+							<h:outputText value="#{user.pais}" />
+						</f:facet>
+						<f:facet name="input">
+							<p:inputText value="#{user.pais}" style="width:100%" />
+						</f:facet>
+					</p:cellEditor>
+				</p:column>
+
+				<!-- Columna rol con filtrado y editado -->
+				<p:column headerText="Rol" filterMatchMode="in"
+					filterBy="#{user.rolToString}">
+					
+					<!-- Filtado con seleccion multiple -->
+					<f:facet name="filter">
+						<p:selectCheckboxMenu onchange="PF('usersTable').filter()"
+							styleClass="custom-filter" label="Roles">
+							<f:selectItems value="#{gestionUsuariosBean.rolesList}" />
+						</p:selectCheckboxMenu>
+					</f:facet>
+
+					<p:cellEditor>
+						<f:facet name="output">
+							<h:outputText value="#{user.rolToString}" />
+						</f:facet>
+						<f:facet name="input">
+							<h:selectOneMenu value="#{user.rolToString}" style="width:100%">
+								<f:selectItems value="#{gestionUsuariosBean.rolesList}"
+									var="color" itemLabel="#{color}" itemValue="#{color}" />
+							</h:selectOneMenu>
+						</f:facet>
+					</p:cellEditor>
+				</p:column>
+
+				<!-- Columna fecha de ultimo acceso -->
+				<p:column filterBy="#{user.f_ultimo_acceso}"
+					headerText="Último acceso" style="width:10%;">
+					<h:outputText value="#{user.f_ultimo_acceso}" />
+				</p:column>
+
+				<!-- Columna con icono de editado -->
+				<p:column style="width:35px">
+					<p:rowEditor />
+				</p:column>
+
+
+			</p:dataTable>
+			
+			<!-- Confirmacion de edicion de fila -->
+			<p:confirmDialog global="true">
+				<p:commandButton value="Si" type="button"
+					styleClass="ui-confirmdialog-yes" icon=" ui-icon-check" />
+				<p:commandButton value="No" type="button"
+					styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+			</p:confirmDialog>
+		</h:form>
+
+		<!-- Dialogo de registro de nuevo usuario -->
+		<p:dialog id="registro" modal="true" showEffect="fade"
+			hideEffect="fade" widgetVar="registroDialog" header="Nuevo Usuario"
+			closeOnEscape="true" responsive="false">
+
+			<!-- Para mostrar los errres de validacion -->
+			<p:messages id="messages" showDetail="true" autoUpdate="true" />
+			
+			<!-- Formulario de registro -->
+			<h:form>
+				<p:panelGrid id="registroPanel" columns="2" layout="grid">
+					<p:outputLabel for="rNombre" value="Nombre:" />
+					<p:inputText id="rNombre" required="true"
+						value="#{RegistroBean.nombre}" />
+
+					<p:outputLabel value="Apellidos:" />
+					<p:inputText value="#{RegistroBean.apellidos}" />
+
+					<p:outputLabel value="País:" />
+					<p:inputText value="#{RegistroBean.pais}" />
+
+					<p:outputLabel for="rEmail" value="Correo electrónico (login):" />
+					<p:inputText id="rEmail" required="true"
+						value="#{RegistroBean.email}" />
+
 					<h:outputLabel for="rol" value="Rol: " />
 					<p:selectOneMenu id="rol" value="#{RegistroBean.rolElegido}">
-			            <f:selectItem itemLabel="Usuario" itemValue="USER" />
-			            <f:selectItem itemLabel="Administrador" itemValue="ADMIN" />
-			            <f:selectItem itemLabel="Superusuario" itemValue="SUPER" />
-			        </p:selectOneMenu>
-	 
-		        </p:panelGrid>
-		        
-		        <p:commandButton value="Registrar" action="#{RegistroBean.registrar}">
-		        	<f:setPropertyActionListener target="#{RegistroBean.esSuperusuario}" value="true" />
-		        </p:commandButton>    
-			    <p:commandButton value="Cancelar" oncomplete="PF('registroDialog').hide()"></p:commandButton>    
-		        
-	        </h:form>
-	</p:dialog>
-		
+						<f:selectItem itemLabel="Usuario" itemValue="USER" />
+						<f:selectItem itemLabel="Administrador" itemValue="ADMIN" />
+						<f:selectItem itemLabel="Superusuario" itemValue="SUPER" />
+					</p:selectOneMenu>
+
+				</p:panelGrid>
+
+				<p:commandButton value="Registrar"
+					action="#{RegistroBean.registrar}">
+					<f:setPropertyActionListener
+						target="#{RegistroBean.esSuperusuario}" value="true" />
+				</p:commandButton>
+				<p:commandButton value="Cancelar"
+					oncomplete="PF('registroDialog').hide()"></p:commandButton>
+
+			</h:form>
+		</p:dialog>
+
 	</div>
 </h:body>
 </html>

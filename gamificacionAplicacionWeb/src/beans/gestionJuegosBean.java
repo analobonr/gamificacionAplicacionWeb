@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -29,167 +30,298 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import com.google.gson.Gson;
-
 import constantes.Mensajes;
 import constantes.Rutas;
 import constantes.URLs;
-import pojos.Estado;
 import pojos.Etapa;
 import pojos.Juego;
 import pojos.Profesor;
-import pojos.configuracionEquipos.ParametrosGE;
 import constantes.valoresDesplegables.estilosJuego_t;
 import constantes.valoresDesplegables.rol_t;
 
-/*Bean que maneja los datos de partidaForm para la configuración de una partida*/
-
+/**
+ * Bean que maneja los datos de la interfaz de gestión de juegos
+ * 
+ * @author Ana Lobón
+ * @version 1.0 (14/06/2020)
+ */
 @ManagedBean
 public class gestionJuegosBean implements Serializable {
 
 	private static final long serialVersionUID = 3885381981170292304L;
 
 	private Profesor login;
-	
-	//Propiedades para el formulario
+
+	// Propiedades para el formulario
 	public Juego juegoform;
 	private String tipoRespuesta;
 	private String[] etapasSeleccionadas;
 	private List<Etapa> listaEtapas = constantes.valoresDesplegables.etapasJuegos;
 	private String estiloJuego;
-	 
-	
-	//Propiedades para la lista de juegos
+
+	// Propiedades para la lista de juegos
 	private List<Juego> juegosFiltrados;
 	private List<Juego> juegosListadoCompleto;
-	
-	//Propiedades para el filtrado
+
+	// Propiedades para el filtrado
 	private String[] etapasFiltro;
-	private String ilimitadasFiltro;  //0 no select, 1 tick, 2 cruz
+	private String ilimitadasFiltro; // 0 no select, 1 tick, 2 cruz
 	private int tipoFichFiltro;
 	private String[] respuestaSelectFiltro;
-	private int minPreguntasMinimasFiltro = 1;
+	private int minPreguntasMinimasFiltro = 0;
 	private int maxPreguntasMinimasFiltro = 100;
-	private int minPreguntasMaximasFiltro = 1;
-	private int maxPreguntasMaximasFiltro = 100;
-	private int minJugadoresFiltro = 1;
-	private int maxJugadoresFiltro = 100;
-	
-	
-	//Propiedad para el renderizado de los botones de modificar o añadir juego
+	private int minFicherosMaximosFiltro = 0;
+	private int maxFicherosMaximosFiltro = 100;
+
+	private int minFicherosMinimosFiltro = 0;
+	private int maxFicherosMinimosFiltro = 100;
+
+	// Propiedad para el renderizado de los botones de modificar o añadir juego
 	private boolean verModificar;
 	private String fieldLegend;
-	
+
+	// Flag que indica si hay un fichero de juego cargado
 	private boolean ficheroSubido;
 
+	/**
+	 * Método que se ejecuta automaticamente cuando carga la interfaz
+	 */
 	@PostConstruct
 	public void init() {
-		
-		//Obtenemos la session del usuario
-		HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+
+		// Obtenemos la session del usuario
+		HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext()
+				.getRequest();
 		HttpSession userSession = request.getSession(true);
 		login = (Profesor) userSession.getAttribute("profesor");
-		
+
 		ExternalContext eContext = FacesContext.getCurrentInstance().getExternalContext();
 
-		if((login == null) || (login.getRol() == rol_t.USER)) {
-			try{
-				
-	            eContext.redirect( eContext.getRequestContextPath() + URLs.pathlogin );
-			}catch(  Exception e ){
-				System.out.println( "Me voy al carajo, no funciona esta redireccion" );
-				
+		// Si el usuario loggeado no tiene rol de superusuario
+		if ((login == null) || (login.getRol() == rol_t.USER)) {
+			try {
+				// Redireccionamos a la interfaz de login
+				eContext.redirect(eContext.getRequestContextPath() + URLs.pathlogin);
+			} catch (Exception e) {
+				System.err.println(e);
 			}
-			
-		}else {
+
+			// Si no...
+		} else {
+			// Inicializamos el objeto Juego para el formulario
 			this.juegoform = new Juego();
+			this.juegoform.setNumFichMin(0);
+			this.juegoform.setNumFichMax(0);
+			this.juegoform.setPregMin(0);
+
+			// Obtenemos el listado de juegos existentes
 			this.juegosListadoCompleto = this.listarJuegos();
 			this.juegosFiltrados = this.juegosListadoCompleto;
+
+			// Inicializamos para vista inicial
 			this.verModificar = false;
 			this.fieldLegend = "Nuevo Juego";
 			this.ficheroSubido = false;
 		}
 	}
 
-	public void add() {
-	
-		//Comprobamos si se ha subido el zip del juego
-		
-		if (this.ficheroSubido) {
-		
-			this.juegoform.setIdJuego(-1);
-			this.juegoform.setEtapa(this.etapasToString());
-			this.juegoform.setTipoRespuesta(Integer.parseInt(tipoRespuesta));	
-			this.juegoform.setEstiloJuego(estilosJuego_t.valueOf(this.estiloJuego));
-			
-			Gson gson = new Gson();
-			String juegoString = gson.toJson(this.juegoform);
-			System.out.println("juegoString: "+juegoString);
-		
-			//Registramos el juego
+	/**
+	 * Realiza la petición get para obtener el listado de juegos
+	 * 
+	 * @return Listado de juegos existentes
+	 */
+	public List<Juego> listarJuegos() {
+
+		List<Juego> lista = new ArrayList<Juego>();
+
+		try {
 			String url = URLs.GETJUEGO;
-			System.out.println("Petición de añadir juego: " + url);
 			RestTemplate restTemplate = new RestTemplate();
-			ResponseEntity<Estado> response = restTemplate.postForEntity(url, this.juegoform, Estado.class);
-	
-			//Si se registro OK
-			if (response.getBody().isEstado()) {
-				System.out.println("Juego añadido correctamente");
-				
-				//Descomprimimos el fichero
-				this.descomprimirZip(this.juegoform.getRutaZip(), this.juegoform.getNombreZip());
-				//Copiamos la portada y la captura en la carpeta del despligue
-				this.despliegueImagenes(this.juegoform.getNombreZip(), this.juegoform.getRutaZip());
-				
-			//Si el registro no OK
-			} else {
-				System.out.println("Juego añadido fail");
-				
-				//Eliminamos el zip
-				File zip = new File(this.juegoform.getRutaZip()+this.juegoform.getNombreZip());
-				
-				if(zip.delete()) {
-					System.out.println("Archivo eliminado");
-				}else {
-					System.out.println("Error al eliminar el archivo");
-				}
-	
+			ResponseEntity<List<Juego>> response = restTemplate.exchange(url, HttpMethod.GET, null,
+					new ParameterizedTypeReference<List<Juego>>() {
+					});
+
+			if (response.getStatusCode().is2xxSuccessful()) {
+				lista = response.getBody();
 			}
-			this.resetForm();
-			this.juegosFiltrados = listarJuegos();
-		}else {
-			FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_ERROR,Mensajes.HEADERERROR, Mensajes.ERRORSUBIRZIP);
-            FacesContext.getCurrentInstance().addMessage(null, message);
+
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
-
-
-		
+		return lista;
 
 	}
-	
-	public void descomprimirZip(String ruta,String nombre) {
-		
 
-		//crea un buffer temporal para el archivo que se va descomprimir
+	/**
+	 * Listener que gestiona la subida de un zip de juego
+	 * 
+	 * @param event Contiene los datos del evento (incluye el archivo)
+	 */
+	public void handleFileUpload(FileUploadEvent event) {
+
+		// Obtenemos el archivo
+		UploadedFile fichero = event.getFile();
+
+		// Asignamos el nombre y la ruta donde se guardara el zip
+		this.juegoform.setNombreZip(fichero.getFileName().split(".zip")[0]);
+		this.juegoform.setRutaZip(Rutas.rutaZip);
+
+		try {
+			// Guardamos el zip en la ruta correspondiente
+			fichero.write(Rutas.rutaZip + fichero.getFileName());
+			this.ficheroSubido = true;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_ERROR, Mensajes.HEADERERROR,
+					Mensajes.ERRORGUARDARZIP);
+			FacesContext.getCurrentInstance().addMessage(null, message);
+		}
+	}
+
+	/**
+	 * Metodo que elimina el zip subido y prepara las variables para poder subir uno
+	 * nuevo
+	 */
+	public void cambiarZip() {
+
+		// Borramos el zip
+		File zip = new File(this.juegoform.getRutaZip() + this.juegoform.getNombreZip() + ".zip");
+		zip.delete();
+
+		// Reseteamos las variables
+		this.ficheroSubido = false;
+		this.juegoform.setRutaZip("");
+		this.juegoform.setNombreZip("");
+
+	}
+
+	/**
+	 * Valida los datos introducidos y añade un nuevo juego
+	 */
+	public void add() {
+
+		// Comprobamos si se ha subido el zip del juego
+		if (this.ficheroSubido) {
+
+			// Preparamos el juego
+			this.juegoform.setId_juego(-1);
+			this.juegoform.setEtapa(this.etapasToString());
+			this.juegoform.setTipoRespuesta(Integer.parseInt(tipoRespuesta));
+			this.juegoform.setEstiloJuego(estilosJuego_t.valueOf(this.estiloJuego));
+
+			// Petición post para añadir el juego
+			boolean error = this.postJuego(this.juegoform);
+
+			// Si se produce error
+			if (error) {
+
+				FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_ERROR, Mensajes.HEADERERROR,
+						Mensajes.ERRORADDJUEGO);
+				FacesContext.getCurrentInstance().addMessage(null, message);
+
+				// Si se añade correctamente
+			} else {
+
+				// Descomprimimos el fichero
+				this.descomprimirZip(this.juegoform.getRutaZip(), this.juegoform.getNombreZip());
+				// Copiamos la portada y la captura en la carpeta del despligue
+				this.despliegueImagenes(this.juegoform.getNombreZip(), this.juegoform.getRutaZip());
+
+				// Reseteamos el formulario y actualizamos el listado de juegos
+				this.resetForm();
+				this.juegosFiltrados = listarJuegos();
+
+			}
+
+			// Eliminamos el zip
+			File zip = new File(this.juegoform.getRutaZip() + this.juegoform.getNombreZip() + ".zip");
+			zip.delete();
+
+		} else {
+			FacesMessage message = new FacesMessage(FacesMessage.SEVERITY_ERROR, Mensajes.HEADERERROR,
+					Mensajes.ERRORSUBIRZIP);
+			FacesContext.getCurrentInstance().addMessage(null, message);
+		}
+
+	}
+
+	/**
+	 * Realiza la petición post para añadir un juego
+	 * 
+	 * @param juego Juego a añadir
+	 * @return Devuelve 1 si se produce error o 0 si el juego se añade correctamente
+	 */
+	private boolean postJuego(Juego juego) {
+
+		boolean error = false;
+
+		try {
+			// Registramos el juego
+			String url = URLs.GETJUEGO;
+			RestTemplate restTemplate = new RestTemplate();
+			ResponseEntity<Object> response = restTemplate.postForEntity(url, juego, null);
+
+			if (!response.getStatusCode().is2xxSuccessful()) {
+				error = true;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			error = true;
+		}
+
+		return error;
+
+	}
+
+	/**
+	 * Metodo que reseta el formulario dejandolo vacio para poder añadir un nuevo
+	 * juego
+	 */
+	public void resetForm() {
+
+		this.juegoform = new Juego();
+		this.setEtapasSeleccionadas(null);
+		this.setTipoRespuesta("0");
+		this.juegoform.setNumFichMin(0);
+		this.juegoform.setNumFichMax(0);
+		this.juegoform.setPregMin(0);
+		this.verModificar = false;
+		this.fieldLegend = "Nuevo Juego";
+		this.ficheroSubido = false;
+	}
+
+	/**
+	 * Método que descomprime el zip del juego
+	 * 
+	 * @param ruta   Ruta donde se encuentra el zip
+	 * @param nombre Nombre del fichero .zip
+	 */
+	public void descomprimirZip(String ruta, String nombre) {
+
+		// Se crea un buffer temporal para el archivo que se va descomprimir
 		ZipInputStream zis;
 		try {
 			zis = new ZipInputStream(new FileInputStream(ruta + nombre + ".zip"));
-			
+
 			ZipEntry salida;
-			
-			//recorre todo el buffer extrayendo uno a uno cada archivo del zup y 
-			//creándolos de nuevo en su archivo original 
+
+			// Se recorre todo el buffer extrayendo uno a uno cada archivo del zip y
+			// creándolos de nuevo en su archivo original
 			try {
 				while (null != (salida = zis.getNextEntry())) {
-					
-					
+
+					// Si es un directorio...
 					if (salida.isDirectory()) {
-						System.out.println("Nombre del directorio: "+salida.getName());	
-			            File directorio = new File(ruta + salida.getName());
-			            directorio.mkdir();
-			        }else {
-			        	System.out.println("Nombre del Archivo: "+salida.getName());	
+						// Se crea
+						File directorio = new File(ruta + salida.getName());
+						directorio.mkdir();
+
+						// Si no.. es un fichero
+					} else {
+
+						// Se guarda
 						FileOutputStream fos = new FileOutputStream(ruta + salida.getName());
 						int leer;
 						byte[] buffer = new byte[1024];
@@ -198,7 +330,7 @@ public class gestionJuegosBean implements Serializable {
 						}
 						fos.close();
 						zis.closeEntry();
-			        }
+					}
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -208,60 +340,65 @@ public class gestionJuegosBean implements Serializable {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+	}
 
-		
-	
-	}
-	
-	public void cambiarZip() {
-		this.ficheroSubido = false;
-		this.juegoform.setRutaZip("");
-		this.juegoform.setNombreZip("");
-		File zip = new File(this.juegoform.getRutaZip()+this.juegoform.getNombreZip());
-		zip.delete();
-	}
-	
+	/**
+	 * Método que despliega las imagenes en el directorio web content de la
+	 * aplicacion
+	 * 
+	 * @param nombreJuego Nombre del juego
+	 * @param rutaOrigen  Ubicación del juego
+	 */
 	public void despliegueImagenes(String nombreJuego, String rutaOrigen) {
-		
-	
-		System.out.println(rutaOrigen+nombreJuego+"/"+Rutas.rutaOrigenImagenes);
-		String ruta = rutaOrigen+nombreJuego+"/"+Rutas.rutaOrigenImagenes;
-		String nombrePortada = nombreJuego.split("jug-")[1]+".png";
-		String nombreCaptura = nombreJuego.split("jug-")[1]+"-cap.jpg";
-		File portada = new File(ruta+nombrePortada);
-		File captura = new File(ruta+nombreCaptura);
-		
+
+		// Creamos los ficheros con las imagenes de caratura y capturas del juego
+		String ruta = rutaOrigen + nombreJuego + "/" + Rutas.rutaOrigenImagenes;
+		String nombrePortada = nombreJuego.split("jug-")[1] + ".png";
+		String nombreCaptura = nombreJuego.split("jug-")[1] + "-cap.jpg";
+		File portada = new File(ruta + nombrePortada);
+		File captura = new File(ruta + nombreCaptura);
+
 		if (portada.isFile()) {
-			File portadaDestino = new File(Rutas.rutaDestinoImagenes+nombrePortada);
-			
+
+			// Fichero de destino de la portada
+			File portadaDestino = new File(Rutas.rutaDestinoImagenes + nombrePortada);
+
+			// Copiamos la portada en el destino
 			this.copiarFicheros(portada, portadaDestino);
-			System.out.println("Portada copiada a: "+Rutas.rutaDestinoImagenes+nombrePortada);
 		}
-		    
-	    if (captura.isFile()) {
-			File capturaDestino = new File(Rutas.rutaDestinoImagenes+nombreCaptura);
+
+		if (captura.isFile()) {
+
+			// Fichero de destino de la captura
+			File capturaDestino = new File(Rutas.rutaDestinoImagenes + nombreCaptura);
+
+			// Copiamos la captura en el destino
 			this.copiarFicheros(captura, capturaDestino);
-			System.out.println("Captura copiada a: "+Rutas.rutaDestinoImagenes+nombreCaptura);
-		
-	    } 
-		    
-		
+
+		}
+
 	}
-	
+
+	/**
+	 * Metodo auxiliar que copia un fichero en otro
+	 * 
+	 * @param origen  Fichero de origen
+	 * @param destino Fichero de destino
+	 */
 	public void copiarFicheros(File origen, File destino) {
 		try {
 			InputStream in = new FileInputStream(origen);
 			OutputStream out = new FileOutputStream(destino);
-			
-		    byte[] buf = new byte[1024];
-		    int len;
-		     
-		    while ((len = in.read(buf)) > 0) {
-		      out.write(buf, 0, len);
-		    }
-		    
-		    in.close();
-		    out.close();
+
+			byte[] buf = new byte[1024];
+			int len;
+
+			while ((len = in.read(buf)) > 0) {
+				out.write(buf, 0, len);
+			}
+
+			in.close();
+			out.close();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -270,143 +407,154 @@ public class gestionJuegosBean implements Serializable {
 			e.printStackTrace();
 		}
 	}
+
+	/**
+	 * Método que realiza la petición PUT para modificar un juego
+	 */
 	public void modificar() {
-		
+
+		// Establecemos la etapa y tipo de respuesta correspondiente
 		this.juegoform.setEtapa(this.etapasToString());
-		this.juegoform.setTipoRespuesta(Integer.parseInt(tipoRespuesta));		
+		this.juegoform.setTipoRespuesta(Integer.parseInt(tipoRespuesta));
 
-		
-		String url = URLs.MODJUEGO;
-		System.out.println("Petición de modificar juego: " + url);
-		RestTemplate restTemplate = new RestTemplate();
-		ResponseEntity<Estado> response = restTemplate.postForEntity(url, this.juegoform, Estado.class);
+		try {
 
-		if (response.getBody().isEstado()) {
-			System.out.println("Juego modificado correctamente");
-		} else {
-			System.out.println("Juego modificado fail");
+			// Petición PUT para modificar el usuario
+			String url = constantes.URLs.GETJUEGO;
+			RestTemplate restTemplate = new RestTemplate();
+			restTemplate.put(url, this.juegoform);
 
+			// Listamos los juegos
+			this.juegosFiltrados = listarJuegos();
+			this.fieldLegend = this.juegoform.getNombre();
+
+			// Capturamos los errores
+		} catch (Exception e) {
+			System.err.println(e.getMessage());
+			FacesContext context = FacesContext.getCurrentInstance();
+			context.addMessage(null, new FacesMessage(Mensajes.HEADERERROR, Mensajes.ERROREDITJUEGO));
 		}
-		
-		this.juegosFiltrados = listarJuegos();
-		this.fieldLegend = this.juegoform.getNombre();
-
-	}
-	
-public void eliminar() {
-		
-		String url = URLs.GETJUEGO + this.juegoform.getIdJuego() ;
-		System.out.println("Petición de elimnar juego: " + url);
-		RestTemplate restTemplate = new RestTemplate();
-		restTemplate.delete(url);
-		
-		this.juegosFiltrados = listarJuegos();
-		this.fieldLegend = this.juegoform.getNombre();
-
 	}
 
-	public List<Juego> listarJuegos() {
-		String url = URLs.GETJUEGO;
-		System.out.println("Petición de obtener el juego: " + url);
-		RestTemplate restTemplate = new RestTemplate();
-		ResponseEntity<List<Juego>> response = restTemplate.exchange(
-				url ,HttpMethod.GET, null, new ParameterizedTypeReference<List<Juego>>(){});
-		
-		return response.getBody();
-		
-		
+	/**
+	 * Metodo que realiza la petición DELETE para eliminar un juego
+	 */
+	public void eliminar() {
+
+		try {
+
+			// Realizamos la petición DELETE
+			String url = URLs.GETJUEGO + this.juegoform.getId_juego();
+			RestTemplate restTemplate = new RestTemplate();
+			restTemplate.delete(url);
+
+			// Listamos los juegos y reseteamos el formulario
+			this.juegosFiltrados = listarJuegos();
+			this.resetForm();
+
+			// Capturamos los errores
+		} catch (Exception e) {
+			System.err.println(e);
+			FacesContext context = FacesContext.getCurrentInstance();
+			context.addMessage(null, new FacesMessage(Mensajes.HEADERERROR, Mensajes.ERRORDELETEJUEGO));
+		}
+
 	}
 
+	/**
+	 * Listener de seleccionar juego. Inicializa las variables para mostrar el juego
+	 * seleccionado
+	 * 
+	 * @param event Evento que contiene el juego a mostrar
+	 */
 	public void onSelectJuego(SelectEvent event) {
 
-		this.juegoform = (Juego) event.getObject();		
+		this.juegoform = (Juego) event.getObject();
 		this.setEtapasSeleccionadas(this.etapasToArray(this.juegoform.getEtapa()));
 		this.setTipoRespuesta(Integer.toString(this.juegoform.getTipoRespuesta()));
 		this.verModificar = true;
 		this.fieldLegend = this.juegoform.getNombre();
 		this.ficheroSubido = true;
-		
+
 	}
-	
-	public void resetForm() {
-        this.juegoform = new Juego();
-        this.setEtapasSeleccionadas(null);
-        this.setTipoRespuesta("0");
-        this.verModificar = false;
-        this.fieldLegend = "Nuevo Juego";
-        this.ficheroSubido = false;
-    }
-public void aplicarFiltros() {
-		
-		System.out.println("Aplicar filtros");
-		
+
+	/**
+	 * Método que filtra los juegos listados
+	 */
+	public void aplicarFiltros() {
+
+		// Obtenemos el listado completo de juegos
 		this.juegosFiltrados = this.listarJuegos();
-		
+
+		// Obtenemos valor del campo pregIlimitadas del filtro
 		Boolean pregIlimitadas = this.setPregIlimitadas(this.ilimitadasFiltro);
-		
+
+		// Iteramos en el listado de juegos
 		Iterator<Juego> iter = this.juegosFiltrados.iterator();
 		Juego j;
+
+		// Flag para comprobar si el elemento pasa los filtros
 		Boolean pasaFiltros = true;
 		while (iter.hasNext()) {
-			
+
+			// Obtenemos el juego
 			j = iter.next();
+
+			// Comprobacion filtro preguntas minimas
 			if (j.getPregMin() < this.minPreguntasMinimasFiltro || j.getPregMin() > this.maxPreguntasMinimasFiltro) {
-				
 				pasaFiltros = false;
-				System.out.println("Preguntas minimas no coincide: " + j.getNombre());
-				
 			}
-			
+
+			// Comprobación filtro ficheros minimos
+			if (j.getNumFichMin() < this.minFicherosMinimosFiltro
+					|| j.getNumFichMin() > this.maxFicherosMinimosFiltro) {
+				pasaFiltros = false;
+			}
+
+			// Comprobación filtro ficheros maximos
+			if (j.getNumFichMax() < this.minFicherosMaximosFiltro
+					|| j.getNumFichMax() > this.maxFicherosMaximosFiltro) {
+				pasaFiltros = false;
+			}
+
+			// Comprobación filtro preguntas ilimitadas
 			if (pregIlimitadas != null) {
-				
-				
-				if(pregIlimitadas.compareTo(new Boolean(j.isPregIlimitadas())) != 0){
+				if (pregIlimitadas.compareTo(new Boolean(j.isPregIlimitadas())) != 0) {
 					pasaFiltros = false;
-					System.out.println("Preguntas ilimitadas no coincide: " + j.getNombre());
-					
-				}
-				
-			}
-			
-			if (this.etapasSeleccionadas != null) {
-				if(this.etapasSeleccionadas.length != 0){
-					if(!existsEtapa(this.etapasSeleccionadas, j.getEtapa())){
-						pasaFiltros = false;
-						System.out.println("Etapas no coincide: " + j.getNombre());
-						
-					}
 				}
 			}
-			
-			if(this.respuestaSelectFiltro.length != 0){
-				if(!existsFormaRespuesta(this.respuestaSelectFiltro, j.getTipoRespuesta())){
+
+			// Comprobación filtro etapa recomendada
+			if (this.etapasFiltro.length != 0) {
+				if (!existsEtapa(this.etapasFiltro, j.getEtapa())) {
 					pasaFiltros = false;
-					System.out.println("Forma respuesta no coincide: " + j.getNombre());
-					
 				}
 			}
-			
-			/*if (tipoFich != j.getTipoFich()) {
-				pasaFiltros = false;
-				System.out.println("Tipo fichero no coincide: " + j.getNombre());
-				System.out.println(tipoFich + " || "+ j.getTipoFich());
-			}*/
-			
-			
-			
+
+			// Comprobacion filtro forma de respuesta
+			if (this.respuestaSelectFiltro.length != 0) {
+				if (!existsFormaRespuesta(this.respuestaSelectFiltro, j.getTipoRespuesta())) {
+					pasaFiltros = false;
+
+				}
+			}
+
+			// Si no pasa todos los filtros, eliminamos el elemento
 			if (!pasaFiltros) {
 				iter.remove();
-				
-				
 			}
-			
+
+			// Reestablecemos el flag a true
 			pasaFiltros = true;
-		
-				
 		}
 	}
 
-	private String etapasToString() {
+	/**
+	 * Metodo que recorre el listado de etapas seleccionadas y lo convierte a string
+	 * 
+	 * @return String de etapas recomendadas separadas mediante un '-'
+	 */
+	public String etapasToString() {
 		String e = "";
 		for (String i : etapasSeleccionadas) {
 			if (e == "") {
@@ -420,90 +568,104 @@ public void aplicarFiltros() {
 
 		return e;
 	}
-	
-	private String[] etapasToArray(String etapasString) {
+
+	/**
+	 * Método que convierte el string de etapas separadas por un '-' en array de
+	 * strings
+	 * 
+	 * @param etapasString String de etapas
+	 * @return Array de string donde cada elemento se corresponde con una etapa
+	 */
+	public String[] etapasToArray(String etapasString) {
 		return etapasString.split("-");
 	}
-	
-private Boolean setPregIlimitadas(String ilimitadas) {
-		
+
+	/**
+	 * Método que determina el estado del check de ilimitadas
+	 * 
+	 * @param ilimitadas Estado de ilimitadas en string ("1" activo, "2" inactivo)
+	 * @return Estado de ilimitadas. True si está activo, False inactivo y null si
+	 *         no está marcado
+	 */
+	public Boolean setPregIlimitadas(String ilimitadas) {
+
 		Boolean pregIlimitadas = null;
 		if (ilimitadas != null) {
 			if (ilimitadas.contains("1")) {
 				pregIlimitadas = new Boolean(true);
-	
-			}else if (ilimitadas.contains("2"))
-			{
+
+			} else if (ilimitadas.contains("2")) {
 				pregIlimitadas = new Boolean(false);
 			}
 		}
-		
+
 		return pregIlimitadas;
 	}
 
+	/**
+	 * Método que comprueba si cada elemento de la lista está contenido en el string
+	 * 
+	 * @param etapasFiltro Listado de etapas seleccionadas en el filtro
+	 * @param etapasJuego  String de etapas de un juego
+	 * @return True si el filtro coincide y false en caso contrario
+	 */
+	public boolean existsEtapa(String[] etapasFiltro, String etapasJuego) {
 
-private boolean existsEtapa(String[] etapasFiltro, String etapasJuego) {
-	
-	boolean existe = false;
+		boolean existe = false;
 
-	for (String etapa:etapasFiltro) {
-		
-		if (etapasJuego.contains(etapa)) {
-			
-			existe = true;
+		for (String etapa : etapasFiltro) {
+
+			if (etapasJuego.contains(etapa)) {
+
+				existe = true;
+			}
 		}
-		
-			
+
+		return existe;
 	}
-	
-	return existe;
-}
 
-private boolean existsFormaRespuesta(String[] respuestasFiltro, int tipoRespuesta) {
-	
-	boolean existe = false;
+	/**
+	 * Método que comprueba si el tipo de respuesta coincide en el listado de
+	 * respuestas
+	 * 
+	 * @param respuestasFiltro Listado de respuestas seleccionadas en el filtro
+	 * @param tipoRespuesta    Identificador del tipo de respuesta
+	 * @return True si existe, false en caso contrario
+	 */
+	public boolean existsFormaRespuesta(String[] respuestasFiltro, int tipoRespuesta) {
 
-	for (String respuesta:respuestasFiltro) {
-		
-		if (Integer.parseInt(respuesta) == tipoRespuesta) {
-			
-			existe = true;
+		boolean existe = false;
+
+		for (String respuesta : respuestasFiltro) {
+
+			if (Integer.parseInt(respuesta) == tipoRespuesta) {
+
+				existe = true;
+			}
 		}
-		
-			
-	}
-	
-	return existe;
-}
-	
-public Juego getJuego(Integer id) {
-		
-		if (id == null){
-            throw new IllegalArgumentException("no id provided");
-        }
-		
-        for (Juego juego : this.juegosListadoCompleto){
-            if (id.equals(juego.getIdJuego())){
-                return juego;
-            }
-        }
-        return null;
+
+		return existe;
 	}
 
-public void handleFileUpload(FileUploadEvent event) {
-  
-	UploadedFile fichero = event.getFile();
-	this.juegoform.setNombreZip(fichero.getFileName().split(".zip")[0]);
-	this.juegoform.setRutaZip(Rutas.rutaZip);
-	
-    try {
-    	fichero.write(Rutas.rutaZip + fichero.getFileName());
-    	this.ficheroSubido = true;
-	} catch (Exception e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
+	/**
+	 * Método que devuelve el juego correspondiente al id
+	 * 
+	 * @param id Identificador de un juego
+	 * @return Juego
+	 */
+	public Juego getJuego(Integer id) {
+
+		if (id == null) {
+			throw new IllegalArgumentException("no id provided");
+		}
+
+		for (Juego juego : this.juegosListadoCompleto) {
+			if (id.equals(juego.getId_juego())) {
+				return juego;
+			}
+		}
+		return null;
 	}
-}
 
 	// GETTERS & SETTERS
 
@@ -514,7 +676,6 @@ public void handleFileUpload(FileUploadEvent event) {
 	public void setTipoRespuesta(String tipoRespuesta) {
 		this.tipoRespuesta = tipoRespuesta;
 	}
-
 
 	public String[] getEtapasSeleccionadas() {
 		return etapasSeleccionadas;
@@ -604,38 +765,6 @@ public void handleFileUpload(FileUploadEvent event) {
 		this.maxPreguntasMinimasFiltro = maxPreguntasMinimasFiltro;
 	}
 
-	public int getMinPreguntasMaximasFiltro() {
-		return minPreguntasMaximasFiltro;
-	}
-
-	public void setMinPreguntasMaximasFiltro(int minPreguntasMaximasFiltro) {
-		this.minPreguntasMaximasFiltro = minPreguntasMaximasFiltro;
-	}
-
-	public int getMaxPreguntasMaximasFiltro() {
-		return maxPreguntasMaximasFiltro;
-	}
-
-	public void setMaxPreguntasMaximasFiltro(int maxPreguntasMaximasFiltro) {
-		this.maxPreguntasMaximasFiltro = maxPreguntasMaximasFiltro;
-	}
-
-	public int getMinJugadoresFiltro() {
-		return minJugadoresFiltro;
-	}
-
-	public void setMinJugadoresFiltro(int minJugadoresFiltro) {
-		this.minJugadoresFiltro = minJugadoresFiltro;
-	}
-
-	public int getMaxJugadoresFiltro() {
-		return maxJugadoresFiltro;
-	}
-
-	public void setMaxJugadoresFiltro(int maxJugadoresFiltro) {
-		this.maxJugadoresFiltro = maxJugadoresFiltro;
-	}
-
 	public boolean isVerModificar() {
 		return verModificar;
 	}
@@ -668,5 +797,44 @@ public void handleFileUpload(FileUploadEvent event) {
 		this.ficheroSubido = ficheroSubido;
 	}
 
+	public Profesor getLogin() {
+		return login;
+	}
+
+	public void setLogin(Profesor login) {
+		this.login = login;
+	}
+
+	public int getMinFicherosMaximosFiltro() {
+		return minFicherosMaximosFiltro;
+	}
+
+	public void setMinFicherosMaximosFiltro(int minFicherosMaximosFiltro) {
+		this.minFicherosMaximosFiltro = minFicherosMaximosFiltro;
+	}
+
+	public int getMaxFicherosMaximosFiltro() {
+		return maxFicherosMaximosFiltro;
+	}
+
+	public void setMaxFicherosMaximosFiltro(int maxFicherosMaximosFiltro) {
+		this.maxFicherosMaximosFiltro = maxFicherosMaximosFiltro;
+	}
+
+	public int getMinFicherosMinimosFiltro() {
+		return minFicherosMinimosFiltro;
+	}
+
+	public void setMinFicherosMinimosFiltro(int minFicherosMinimosFiltro) {
+		this.minFicherosMinimosFiltro = minFicherosMinimosFiltro;
+	}
+
+	public int getMaxFicherosMinimosFiltro() {
+		return maxFicherosMinimosFiltro;
+	}
+
+	public void setMaxFicherosMinimosFiltro(int maxFicherosMinimosFiltro) {
+		this.maxFicherosMinimosFiltro = maxFicherosMinimosFiltro;
+	}
 
 }

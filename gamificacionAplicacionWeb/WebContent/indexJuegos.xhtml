@@ -5,7 +5,7 @@
 
 <h:head>
 	<title>Menu</title>
-	<h:outputStylesheet library="css" name="miEstilo.css" />
+	<h:outputStylesheet library="css" name="general.css" />
 	<h:outputStylesheet library="css" name="adminJuegos.css" />
 </h:head>
 
@@ -26,16 +26,17 @@
 				<p:menuitem id="salir" icon="ui-icon-extlink" actionListener="#{loginBean.cerrarSesion}" oncomplete="window.location.href ='./login.xhtml'"/>
 
 				<p:submenu id="menu" label="Menu">
-					<p:menuitem value="Buscador de partidas" />
-					<p:menuitem value="Buscador de plantillas" />
-					<p:menuitem value="Estadísticas" />
-					<p:menuitem value="Datos personales" />
+					<p:menuitem value="Buscador de partidas" disabled="true"/>
+					<p:menuitem value="Buscador de plantillas" disabled="true"/>
+					<p:menuitem value="Estadísticas" disabled="true"/>
+					<p:menuitem value="Datos personales" disabled="true"/>
 				</p:submenu>
 
 				<f:facet name="options">
 					<p:outputLabel value="¡Bienvenid@, "></p:outputLabel>
 					<p:outputLabel value="#{loginBean.p.nombre}"></p:outputLabel>
 					<p:outputLabel value="!"></p:outputLabel>
+					<p:outputLabel id="rol" value="#{loginBean.rolUsuario}"></p:outputLabel>
 
 				</f:facet>
 
@@ -73,42 +74,47 @@
 
 								</p:column>
 
+								
 								<p:column colspan="1" styleClass="columnasFiltrado">
 
-									<p:outputLabel for="minJug" value="Jugadores:" />
-									<p:spinner id="minJug"
-										value="#{gestionJuegosBean.minJugadoresFiltro}" min="0"
-										max="100" styleClass="spinners" onchange="rcFiltros()" />
-									<p:outputLabel value="  -  " />
-									<p:spinner id="maxJug"
-										value="#{gestionJuegosBean.maxJugadoresFiltro}" min="0"
-										max="100" onchange="rcFiltros()" />
-
-								</p:column>
-								<p:column colspan="1" styleClass="columnasFiltrado">
-
-									<p:outputLabel for="minPregm" value="Mínimo de preguntas:" />
-									<p:spinner id="minPregm"
+									<p:outputLabel for="minPregmin" value="Mínimo de preguntas:" />
+									<p:spinner id="minPregmin"
 										value="#{gestionJuegosBean.minPreguntasMinimasFiltro}" min="0"
 										max="100" onchange="rcFiltros()" />
 									<p:outputLabel value="  -  " />
-									<p:spinner id="maxPregm"
+									<p:spinner id="maxPregmin"
 										value="#{gestionJuegosBean.maxPreguntasMinimasFiltro}" min="0"
 										max="100" onchange="rcFiltros()" />
 
 								</p:column>
+								
 								<p:column colspan="1" styleClass="columnasFiltrado">
 
-									<p:outputLabel for="minPregM" value="Máximo de preguntas:" />
-									<p:spinner id="minPregM"
-										value="#{gestionJuegosBean.minPreguntasMaximasFiltro}" min="0"
+									<p:outputLabel for="minFichMin" value="Mínimo de ficheros:" />
+									<p:spinner id="minFichMin"
+										value="#{gestionJuegosBean.minFicherosMinimosFiltro}" min="0"
 										max="100" onchange="rcFiltros()" />
 									<p:outputLabel value="  -  " />
-									<p:spinner id="maxPregM"
-										value="#{gestionJuegosBean.maxPreguntasMaximasFiltro}" min="0"
+									<p:spinner id="maxFichMin"
+										value="#{gestionJuegosBean.maxFicherosMinimosFiltro}" min="0"
 										max="100" onchange="rcFiltros()" />
 
 								</p:column>
+								
+								<p:column colspan="1" styleClass="columnasFiltrado">
+
+									<p:outputLabel for="minFichMax" value="Máximo de ficheros:" />
+									<p:spinner id="minFichMax"
+										value="#{gestionJuegosBean.minFicherosMaximosFiltro}" min="0"
+										max="100" onchange="rcFiltros()" />
+									<p:outputLabel value="  -  " />
+									<p:spinner id="maxFichMax"
+										value="#{gestionJuegosBean.maxFicherosMaximosFiltro}" min="0"
+										max="100" onchange="rcFiltros()" />
+
+								</p:column>
+								
+								
 
 
 							</p:row>
@@ -284,14 +290,14 @@
 									<p:column colspan="2" styleClass="columnasNuevoJuego">
 										<p:outputLabel for="preguntas"
 											value="Número de preguntas mínimas:" />
-										<p:spinner id="preguntas" min="1"
+										<p:spinner id="preguntas" min="0"
 											value="#{gestionJuegosBean.juegoform.pregMin}" />
 									</p:column>
 
 									<p:column colspan="2" styleClass="columnasNuevoJuego">
 										<p:outputLabel for="numFichMax"
 											value="Número de ficheros máximos:" />
-										<p:spinner id="numFichMax" min="1"
+										<p:spinner id="numFichMax" min="0"
 											value="#{gestionJuegosBean.juegoform.numFichMax}" />
 									</p:column>
 

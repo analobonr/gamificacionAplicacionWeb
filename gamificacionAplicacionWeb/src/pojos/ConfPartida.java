@@ -1,6 +1,5 @@
 package pojos;
 
-import java.sql.Date;
 
 public class ConfPartida {
 	
@@ -12,11 +11,14 @@ public class ConfPartida {
 	private int porcentaje_correccion;
 	private String parametros;
 	private String equipos;
-	//private String fecha_creacion;
+	
+	
+	private String fecha_creacion;
 	private String etapa;
 	private String curso;
 	private String asignatura;
 	private String tema;
+	private int tiemporespuesta;
 	
 	
 	public ConfPartida() {
@@ -25,7 +27,7 @@ public class ConfPartida {
 	
 	public ConfPartida(int id_configuracion,int id_profesor, int id_juego, int id_fpreguntas, String titulo, String etapa,
 				String curso, String asignatura, String tema, int porcentaje_correccion, 
-				String parametros, String equipos) {
+				String parametros, String equipos,int tiemporespuesta) {
 		
 		this.setId_configuracion(id_configuracion);
 		this.setId_profesor(id_profesor);
@@ -39,6 +41,7 @@ public class ConfPartida {
 		this.setPorcentaje_correccion(porcentaje_correccion);
 		this.setParametros(parametros);
 		this.setEquipos(equipos);
+		this.setTiemporespuesta(tiemporespuesta);
 		
 		
 			
@@ -203,6 +206,24 @@ public class ConfPartida {
 
 	public void setTema(String tema) {
 		this.tema = tema;
+	}
+
+	public String getFecha_creacion() {
+		return fecha_creacion;
+	}
+
+	
+	
+	public void setFecha_creacion(String fecha_creacion) {
+		this.fecha_creacion = fecha_creacion;
+	}
+
+	public int getTiemporespuesta() {
+		return tiemporespuesta;
+	}
+
+	public void setTiemporespuesta(int tiemporespuesta) {
+		this.tiemporespuesta = tiemporespuesta;
 	}
 
 	

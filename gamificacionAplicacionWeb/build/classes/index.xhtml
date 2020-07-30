@@ -5,401 +5,547 @@
 
 <h:head>
 	<title>Menu</title>
-	<h:outputStylesheet library="css" name="miEstilo.css"/>
+	<h:outputStylesheet library="css" name="general.css" />
 </h:head>
 
-<h:body id="general"> 
+<h:body id="general">
 
-	<div id="divTop">   
-	 
+	<!-- MENU -->
+	<div id="divTop">
+
 		<h:form>
 			<p:menubar id="menubar" styleClass="resaltar1">
-		 
-		    
-		    	<p:menuitem id="home" cssClass="estiloHome" url="/index.xhtml">
-		    		<img src="logoADJA.png" alt="AJDA" width="75" height="50"/>
-		    	</p:menuitem>
-		    
-        	
-        	<p:menuitem id="salir" icon="ui-icon-extlink" actionListener="#{loginBean.cerrarSesion}" oncomplete="window.location.href ='./login.xhtml'"/>
-        	
-        	<p:submenu id="menu" label="Menu" >
-	            <p:menuitem value="Buscador de partidas" />
-	            <p:menuitem value="Buscador de plantillas" />
-	            <p:menuitem value="Estadísticas"  />
-	            <p:menuitem value="Datos personales"/>
-        	</p:submenu>
-        	
-        	<f:facet name="options">
-		        <p:outputLabel value="¡Bienvenid@, "></p:outputLabel>
-		        <p:outputLabel value="#{loginBean.p.nombre}"></p:outputLabel>
-		        <p:outputLabel value="!"></p:outputLabel>
-		        <p:outputLabel id="rol" value="#{loginBean.rolUsuario}"></p:outputLabel>
-		      
-		    </f:facet>
-		    
-		    <p:menuitem id="menuJuegos" value="Juegos" icon="ui-icon-gear" url="/indexJuegos.xhtml" rendered="#{loginBean.p.rol != 'USER'}"/>
-		    <p:menuitem id="menuUsuarios" value="Usuarios" icon="ui-icon-gear" url="/indexUsuarios.xhtml" rendered="#{loginBean.p.rol == 'SUPER'}"/>
-	    
-        	
+
+
+				<p:menuitem id="home" cssClass="estiloHome" url="/index.xhtml">
+					<img src="logoADJA.png" alt="AJDA" width="75" height="50" />
+				</p:menuitem>
+
+
+				<p:menuitem id="salir" icon="ui-icon-extlink"
+					actionListener="#{loginBean.cerrarSesion}"
+					oncomplete="window.location.href ='./login.xhtml'" />
+
+				<p:submenu id="menu" label="Menu">
+					<p:menuitem value="Buscador de partidas" disabled="true"/>
+					<p:menuitem value="Buscador de plantillas" disabled="true"/>
+					<p:menuitem value="Estadísticas" disabled="true"/>
+					<p:menuitem value="Datos personales" disabled="true"/>
+				</p:submenu>
+
+				<f:facet name="options">
+					<p:outputLabel value="¡Bienvenid@, "></p:outputLabel>
+					<p:outputLabel value="#{loginBean.p.nombre}"></p:outputLabel>
+					<p:outputLabel value="!"></p:outputLabel>
+					<p:outputLabel id="rol" value="#{loginBean.rolUsuario}"></p:outputLabel>
+
+				</f:facet>
+
+				<p:menuitem id="menuJuegos" value="Juegos" icon="ui-icon-gear"
+					url="/indexJuegos.xhtml" rendered="#{loginBean.p.rol != 'USER'}" />
+				<p:menuitem id="menuUsuarios" value="Usuarios" icon="ui-icon-gear"
+					url="/indexUsuarios.xhtml" rendered="#{loginBean.p.rol == 'SUPER'}" />
+
+
 			</p:menubar>
 		</h:form>
-	
+
 	</div>
-	
-	
+
+
 	<div id="contenido">
-		
-		<h:form>  
-			<div id="panelLeft">
-				<p:dataList id="listaMisPartidas" value="#{partidasBean.misPartidas}" var="misPartidas" type="definition">
-	        		<f:facet id="facetMisPartidas" name="header">
-	        			<p:outputLabel  value="PLANTILLAS DE PARTIDAS"/>
-	        			<div id="add-partida" style="text-align:right">
-	        				<p:commandButton id="addPlantillaButton" icon="ui-icon-plus" update="confPartidaDialog" actionListener="#{configurarPartida.resetearConfig}" oncomplete="PF('confPartidaDialog').show()">
-	        					
-	        				</p:commandButton>
-	        				<p:tooltip for="addPlantillaButton" value="Nueva plantilla" position="top"/>
-	        			</div>
-	        			
-	        		</f:facet>
-	        		
-	        		<p:panelGrid id="panelGridList" columns="2" styleClass="ui-noborder" layout="grid">
-	        				<p:column id="col1" styleClass="textoIzquierda"><h:outputText value="#{misPartidas.titulo}" /></p:column>
-	        				<p:column id="col2" styleClass="textoDerecha">
-	        					<p:button id="playButton" icon="ui-icon-play" />
-	        					<p:tooltip for="playButton" value="Iniciar partida" position="top"/>
-	        					
-	        					<p:commandButton id="confButton" icon="ui-icon-gear" actionListener="#{configurarPartida.seleccionarConf}" oncomplete="PF('confPartidaDialog').show()" update="confPartidaDialog">
-	        						<f:param name="partidaID" value="#{misPartidas.id_configuracion}"/>
-	        					</p:commandButton>
-	        					<p:tooltip for="confButton" value="Modificar plantilla" position="top"/>
-	        					
-	        					<p:commandButton id="copyButton" icon="ui-icon-copy" actionListener="#{configurarPartida.duplicar}">
-	        						<f:param name="partidaID" value="#{misPartidas.id_configuracion}"/> 
-	        						<p:confirm header="Confirmación" message="¿Está seguro que desea duplicar la plantilla?" icon="ui-icon-alert" />
-	        					</p:commandButton>
-	        					<p:tooltip for="copyButton" value="Duplicar plantilla" position="top"/>
-	        					
-	        					<p:commandButton id="deleteButton" icon="ui-icon-trash" actionListener="#{configurarPartida.eliminar}">
-	        						<f:param name="partidaID" value="#{misPartidas.id_configuracion}"/> 
-	        						<p:confirm header="Confirmación" message="¿Está seguro que desea eliminar la configuración?" icon="ui-icon-alert" />
-	        					</p:commandButton>
-	        					<p:tooltip for="deleteButton" value="Eliminar plantilla" position="top"/>
-	        					
-	        					<p:confirmDialog global="true">
-							        <p:commandButton value="Si" type="button" styleClass="ui-confirmdialog-yes" icon=" ui-icon-check" />
-							        <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
-							    </p:confirmDialog> 
-								        					
-	        				</p:column>
-	        			
-	        		</p:panelGrid>
-	    	</p:dataList>
+
+		<h:form>
 			
-			</div>  		
-    		
-	    	<div id="panelRight" >
-	    		<p:dataList value="#{partidasBean.partidasEnCurso}" var="partidasEnCurso" type="definition"
-			    				 controlsLocation="none" responsive="true">
-	        		<f:facet name="header">
-	        			<p:outputLabel value="PARTIDAS EN CURSO"/>
-	        			<div>
-	        				<p:commandButton icon="ui-icon-plus" oncomplete="PF('confPartidaDialog').show()" style="visibility:hidden"/>
-	        			</div>
-	        		</f:facet>
-	        		
-	        		<p:panelGrid id="panelGridList" columns="2" styleClass="ui-noborder" layout="grid">
-	        				<p:column id="col1" styleClass="textoIzquierda"><h:outputText value="#{partidasEnCurso.titulo}" /></p:column>
-	        				<p:column id="col2" styleClass="textoDerecha">
-	        					<p:button icon="ui-icon-trash" />
-	        					<p:commandButton icon="ui-icon-gear" oncomplete="PF('confPartidaDialog').show()"></p:commandButton>
-	        					<p:button icon="ui-icon-play" />
-	        				</p:column>
-	        			
-	        		</p:panelGrid>
-	       
-	        		
-	    		</p:dataList>
-	    	</div>
-	    		
-		    
-     	</h:form>
-	
+			<!-- Datalist de Plantillas -->
+			<div id="panelLeft">
+				<p:dataList id="listaMisPartidas"
+					value="#{partidasBean.misPartidas}" var="misPartidas"
+					type="definition">
+					<f:facet id="facetMisPartidas" name="header">
+						<p:outputLabel value="PLANTILLAS DE PARTIDAS" />
+						<div id="add-partida" style="text-align: right">
+							<p:commandButton id="addPlantillaButton" icon="ui-icon-plus"
+								update="confPartidaDialog"
+								actionListener="#{configurarPartida.resetearConfig}"
+								oncomplete="PF('confPartidaDialog').show()" />
+							<p:tooltip for="addPlantillaButton" value="Nueva plantilla"
+								position="top" />
+						</div>
+
+					</f:facet>
+
+					<p:panelGrid id="panelGridList" columns="2"
+						styleClass="ui-noborder" layout="grid">
+						<p:column id="col1" styleClass="textoIzquierda">
+							<h:outputText value="#{misPartidas.titulo}" />
+						</p:column>
+						<p:column id="col2" styleClass="textoDerecha">
+
+							<p:commandButton id="playButton" icon="ui-icon-play"
+								actionListener="#{partidasBean.iniciarPartida}">
+								<f:param name="plantillaID"
+									value="#{misPartidas.id_configuracion}" />
+							</p:commandButton>
+							<p:tooltip for="playButton" value="Iniciar partida"
+								position="top" />
+
+							<p:commandButton id="confButton" icon="ui-icon-gear"
+								actionListener="#{configurarPartida.seleccionarConf}"
+								oncomplete="PF('confPartidaDialog').show()"
+								update="confPartidaDialog">
+								<f:param name="partidaID"
+									value="#{misPartidas.id_configuracion}" />
+							</p:commandButton>
+							<p:tooltip for="confButton" value="Modificar plantilla"
+								position="top" />
+
+							<p:commandButton id="copyButton" icon="ui-icon-copy"
+								actionListener="#{configurarPartida.duplicar}">
+								<f:param name="partidaID"
+									value="#{misPartidas.id_configuracion}" />
+								<p:confirm header="Confirmación"
+									message="¿Está seguro que desea duplicar la plantilla?"
+									icon="ui-icon-alert" />
+							</p:commandButton>
+							<p:tooltip for="copyButton" value="Duplicar plantilla"
+								position="top" />
+
+							<p:commandButton id="deleteButton" icon="ui-icon-trash"
+								actionListener="#{configurarPartida.eliminar}">
+								<f:param name="partidaID"
+									value="#{misPartidas.id_configuracion}" />
+								<p:confirm header="Confirmación"
+									message="¿Está seguro que desea eliminar la configuración?"
+									icon="ui-icon-alert" />
+							</p:commandButton>
+							<p:tooltip for="deleteButton" value="Eliminar plantilla"
+								position="top" />
+
+							<p:confirmDialog global="true">
+								<p:commandButton value="Si" type="button"
+									styleClass="ui-confirmdialog-yes" icon=" ui-icon-check" />
+								<p:commandButton value="No" type="button"
+									styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+							</p:confirmDialog>
+
+						</p:column>
+
+					</p:panelGrid>
+				</p:dataList>
+
+			</div>
+
+
+			<!-- Datalist de Partidas en curso -->
+			<div id="panelRight">
+				<p:dataList value="#{partidasBean.partidasEnCurso}"
+					var="partidasEnCurso" type="definition" controlsLocation="none"
+					responsive="true">
+					<f:facet name="header">
+						<p:outputLabel value="PARTIDAS EN CURSO" />
+						<div>
+							<p:commandButton icon="ui-icon-plus"
+								oncomplete="PF('confPartidaDialog').show()"
+								style="visibility:hidden" />
+						</div>
+					</f:facet>
+
+					<p:panelGrid id="panelGridList" columns="2"
+						styleClass="ui-noborder" layout="grid">
+						<p:column id="col1" styleClass="textoIzquierda">
+							<h:outputText value="#{partidasEnCurso.titulo}" />
+						</p:column>
+						<p:column id="col2" styleClass="textoDerecha">
+							<p:commandButton id="continueButton" icon="ui-icon-play" disabled="true"/>
+							<p:tooltip for="continueButton" value="Continuar partida"
+								position="top" />
+							<p:commandButton id="finishButton" icon="ui-icon-stop" actionListener="#{partidasBean.finalizarPartida}">
+								<f:param name="partidaID"
+									value="#{partidasEnCurso.id_partida}" />
+							</p:commandButton>
+							<p:tooltip for="finishButton" value="Finalizar partida"
+								position="top" />
+						</p:column>
+
+					</p:panelGrid>
+
+
+				</p:dataList>
+			</div>
+
+
+		</h:form>
+
 	</div>
-		<p:dialog id="confPartidaDialog" modal="true" widgetVar="confPartidaDialog" header="Configuración Partida" closeOnEscape="true" responsive="false"
-				 resizable="true">
-        	<h:form>
-		 		<p:wizard flowListener="#{configurarPartida.onFlowProcess}">
-		 		
-		        	<p:tab id="general" title="General">
-			            <p:panel header="Información general de la partida">
-			                <h:panelGrid columns="2" columnClasses="label, value">
-			                    <p:outputLabel for="titulo" value="Titulo: "/>
-			 					<p:inputText id="titulo" required="true" value="#{configurarPartida.titulo}"/>
-			 	
-			 					<p:outputLabel for="etapa" value="Etapa: "/>
-			 					<p:inputText id="etapa" value="#{configurarPartida.etapa}"/>
-			 					
-			 					<p:outputLabel for="curso" value="Curso: "/>
-			 					<p:inputText id="curso" value="#{configurarPartida.curso}"/>
-			 					
-			 					<p:outputLabel for="asig" value="Asignatura: "/>
-			 					<p:inputText id="asig" value="#{configurarPartida.asignatura}"/>
-			 					
-			 					<p:outputLabel for="tema" value="Tema: "/>
-			 					<p:inputText id="tema" value="#{configurarPartida.tema}"/>
-			 					
-			 					<p:outputLabel for="obs" value="Observaciones: "/>
-			 					 <p:inputTextarea id="obs" rows="6" cols="20" />
-			                </h:panelGrid>
-			            </p:panel>
-			            
-		        	</p:tab>
-		        	
-			        <p:tab id="juego" title="Juego">
-			        <p:messages id="juegoMessage" showDetail="true" closable="true" autoupdate="true"/>
-			        	<div id="#{configurarPartida.estiloPanelInfoJuego}">
-			        	
-				        	 <p:panel header="#{configurarPartida.juegoSeleccionado.nombre}" style="overflow:auto;">
-				              	<p:panelGrid >
-				              		<p:row>
-				              			<p:column colspan="1" rowspan="2">
-				              				<img src="#{configurarPartida.caratulaSrc}" alt="CARATULA" width="150" height="150"/>
-				              			</p:column>
-				              			
-				              			<p:column colspan="2">
-											<h:outputText value="#{configurarPartida.juegoSeleccionado.descripcion}" />
+
+	<!-- Dialogo para configuracion de plantillas -->
+	<p:dialog id="confPartidaDialog" modal="true"
+		widgetVar="confPartidaDialog" header="Configuración Partida"
+		closeOnEscape="true" responsive="false" resizable="true"
+		position="center center" appendToBody="true"
+		onHide="PF('wiz').loadStep('general', false)">
+		<h:form>
+			<p:wizard widgetVar="wiz" flowListener="#{configurarPartida.cambiarTab}"
+				nextLabel="Siguiente" backLabel="Atrás">
+
+				<p:tab id="general" title="General">
+					<p:panel header="Información general de la partida">
+						<h:panelGrid columns="2" columnClasses="label, value">
+							<p:outputLabel for="titulo" value="Titulo: " />
+							<p:inputText id="titulo" required="true"
+								value="#{configurarPartida.titulo}" />
+
+							<p:outputLabel for="etapa" value="Etapa: " />
+							<p:inputText id="etapa" value="#{configurarPartida.etapa}" />
+
+							<p:outputLabel for="curso" value="Curso: " />
+							<p:inputText id="curso" value="#{configurarPartida.curso}" />
+
+							<p:outputLabel for="asig" value="Asignatura: " />
+							<p:inputText id="asig" value="#{configurarPartida.asignatura}" />
+
+							<p:outputLabel for="tema" value="Tema: " />
+							<p:inputText id="tema" value="#{configurarPartida.tema}" />
+
+						</h:panelGrid>
+					</p:panel>
+
+				</p:tab>
+
+				<p:tab id="juego" title="Juego">
+					<p:messages id="juegoMessage" showDetail="true" closable="true"
+						autoupdate="true" />
+					<div id="#{configurarPartida.estiloPanelInfoJuego}">
+
+						<p:panel header="#{configurarPartida.juegoSeleccionado.nombre}"
+							style="overflow:auto;">
+							<p:panelGrid>
+								<p:row>
+									<p:column colspan="1" rowspan="2">
+										<img src="#{configurarPartida.caratulaSrc}" alt="CARATULA"
+											width="150" height="150" />
+									</p:column>
+
+									<p:column colspan="2">
+										<h:outputText
+											value="#{configurarPartida.juegoSeleccionado.descripcion}" />
+									</p:column>
+
+								</p:row>
+
+								<p:row>
+									<p:column colspan="2">
+										<p:panelGrid columns="2">
+											<f:facet name="header">
+												<h:outputText value="INFORMACIÓN" />
+											</f:facet>
+
+											<h:outputText value="Nº jugadores" />
+											<h:outputText value="" />
+
+											<h:outputText value="Nº preguntas minimas" />
+											<h:outputText
+												value="#{configurarPartida.juegoSeleccionado.pregMin}" />
+
+
+											<h:outputText value="Tipo respuesta" />
+											<h:outputText
+												value="#{configurarPartida.juegoSeleccionado.tipoRespuesta}" />
+
+
+											<h:outputText value="Tipo fichero" />
+											<h:outputText
+												value="#{configurarPartida.juegoSeleccionado.tipoFich}" />
+
+											<h:outputText value="Etapa recomendada" />
+											<h:outputText
+												value="#{configurarPartida.juegoSeleccionado.etapa}" />
+										</p:panelGrid>
+									</p:column>
+								</p:row>
+
+								<p:row>
+									<p:column colspan="3">
+										<img src="#{configurarPartida.capturaSrc}" alt="CAPTURA"
+											width="500" height="300" />
+									</p:column>
+								</p:row>
+
+
+
+							</p:panelGrid>
+
+
+						</p:panel>
+						<p:commandButton value="Cambiar juego"
+							actionListener="#{configurarPartida.cambiarJuego}"
+							oncomplete="PF('confPartidaDialog').show()"
+							update="confPartidaDialog" />
+
+					</div>
+					<div id="#{configurarPartida.estiloPanelSelectJuego}">
+						<p:panel header="Selección del juego">
+							<h:panelGrid columns="2" columnClasses="grid, grid">
+								<h:panelGrid columns="1">
+									<p:orderList id="juegoList"
+										value="#{configurarPartida.juegosFiltrados}" var="Juego"
+										itemValue="#{Juego}" converter="juegoConverter"
+										controlsLocation="none" responsive="true">
+										<p:ajax event="select"
+											listener="#{configurarPartida.onSelectJuego}"
+											oncomplete="PF('confPartidaDialog').show()"
+											update="confPartidaDialog" />
+										<f:facet name="caption">Juegos</f:facet>
+										<p:column>
+											<h:outputText id="n" value="#{Juego.nombre}" />
 										</p:column>
-				              			
-				              		</p:row>
-					   				
-					   				 <p:row>
-					   				 	<p:column colspan="2">
-					              			<p:panelGrid columns="2" >
-								        		<f:facet name="header">
-											        <h:outputText value="INFORMACIÓN"/>
-											    </f:facet>
-								        		
-								        		<h:outputText value="Nº jugadores"/>
-										        <h:outputText value="" />
-											    
-								        		<h:outputText value="Nº preguntas minimas"/>
-										        <h:outputText value="#{configurarPartida.juegoSeleccionado.pregMin}" />
-											    
-														    
-											    <h:outputText value="Tipo respuesta"/>
-										        <h:outputText value="#{configurarPartida.juegoSeleccionado.tipoRespuesta}" />
-											    
-											    
-											    <h:outputText value="Tipo fichero"/>
-										        <h:outputText value="#{configurarPartida.juegoSeleccionado.tipoFich}" />
-											   
-											    <h:outputText value="Etapa recomendada"/>
-											    <h:outputText value="#{configurarPartida.juegoSeleccionado.etapa}" />
-								        	</p:panelGrid> 
-				              			</p:column>
-								     </p:row>
-					            
-					            	<p:row>
-					   				 	<p:column colspan="3">
-					   				 		<img src="#{configurarPartida.capturaSrc}" alt="CAPTURA" width="500" height="300"/>
-					   				 	</p:column>
-								     </p:row>
-					        	
-					        	
-					        	
-					          </p:panelGrid> 
-					          
-				                
-				            </p:panel>
-			                <p:commandButton value="Cambiar juego" actionListener="#{configurarPartida.cambiarJuego}" oncomplete="PF('confPartidaDialog').show()" update="confPartidaDialog"/>
-			           		
-			            </div>
-			            <div id="#{configurarPartida.estiloPanelSelectJuego}">
-				            <p:panel  header="Selección del juego">
-				                <h:panelGrid columns="2" columnClasses="grid, grid">
-				                	 <h:panelGrid columns="1">
-				                	 	<p:orderList id="juegoList" value="#{buscadorJuegosBean.juegosFiltrados}" var="Juego" itemValue="#{Juego}" converter="juegoConverter" controlsLocation="none" responsive="true">
-									        <p:ajax event="select" listener="#{configurarPartida.onSelectJuego}" oncomplete="PF('confPartidaDialog').show()" update="confPartidaDialog" /> 
-									        <f:facet name="caption">Juegos</f:facet>
-								         	<p:column>
-									            <h:outputText id="n" value="#{Juego.nombre}" />
-									        </p:column>
-									   	</p:orderList>
-				                	 </h:panelGrid>  
-				                	 <h:panelGrid columns="2" columnClasses="grid, grid">
-				                	 	<h:panelGrid columns="2" columnClasses="label, value">
-					                	 	<p:triStateCheckbox value="#{buscadorJuegosBean.ilimitadas}" itemLabel="Preguntas ilimitadas" onchange="rc()"/>
-				 							<br/>
-				 							<p:outputLabel for="respuesta" value="Forma de respuesta: "/>
-								 			<p:selectCheckboxMenu id="respuesta" value="#{buscadorJuegosBean.respuestaSelect}" multiple="true" onchange="rc()">
-								            	<f:selectItem itemLabel="Sin respuesta" itemValue="0"></f:selectItem>
-								 				<f:selectItem itemLabel="Respuestas con opciones (A,B,C,...)" itemValue="1"></f:selectItem>
-								 				<f:selectItem itemLabel="Cifras" itemValue="2"></f:selectItem>
-								 				<f:selectItem itemLabel="Campos de texto" itemValue="3"></f:selectItem>
-								 				<f:selectItem itemLabel="Respuestas de relacionar" itemValue="4"></f:selectItem>
-								        	</p:selectCheckboxMenu>
-								        	
-								 			<p:outputLabel for="etapa2" value="Etapa recomendada:"/>
-								 			<p:selectCheckboxMenu id="etapa2" value="#{buscadorJuegosBean.etapasSeleccionadas}" label="e" multiple="true" onchange="rc()"
-								 			 									updateLabel="true">
-								            	<f:selectItems value="#{buscadorJuegosBean.etapas}" var="e" itemLabel="#{e.descripcion}" itemValue="#{e.id}"/>
-								        	</p:selectCheckboxMenu>	
-								        	
-							        	</h:panelGrid>	
-							        	
-							        	<h:panelGrid columns="2" columnClasses="label, value">
-							        		<p:outputLabel for="jugadores" value="Mínimo de jugadores:"/>
-								        	<h:panelGrid id="jugadores" columns="1" style="margin-bottom: 10px">
-										        <h:outputText id="displayRange" value="Desde #{buscadorJuegosBean.minJugadores} hasta #{buscadorJuegosBean.maxJugadores}" />
-										        <p:slider for="minJug,maxJug" display="displayRange" style="width: 400px" range="true" displayTemplate="Desde {min} hasta {max} minimo de jugadores" disabled="true" onSlideEnd="rc()"/>
-										    </h:panelGrid>
-										    <h:inputHidden id="minJug" value="#{buscadorJuegosBean.minJugadores}"/>
-										    <h:inputHidden id="maxJug" value="#{buscadorJuegosBean.maxJugadores}"/>
-										    
-										    <p:outputLabel for="preguntasMin" value="Mínimo de preguntas:"/>
-								 			<h:panelGrid id="preguntasMin" columns="1" style="margin-bottom: 10px">
-										        <h:outputText id="displayRangepmin" value="Desde #{buscadorJuegosBean.minPreguntasMinimas} hasta #{buscadorJuegosBean.maxPreguntasMinimas}" />
-										        <p:slider for="minPregm,maxPregm" display="displayRangepmin" style="width: 400px" range="true" displayTemplate="Desde {min} hasta {max} mínimo de preguntas" onSlideEnd="rc()"/>
-										    </h:panelGrid>
-										    <h:inputHidden id="minPregm" value="#{buscadorJuegosBean.minPreguntasMinimas}" />
-										    <h:inputHidden id="maxPregm" value="#{buscadorJuegosBean.maxPreguntasMinimas}" />
-										    
-										    <p:outputLabel for="preguntasMax" value="Máximo de preguntas:"/>
-								 			<h:panelGrid id="preguntasMax" columns="1" style="margin-bottom: 10px">
-										        <h:outputText id="displayRangepMax" value="Desde #{buscadorJuegosBean.minPreguntasMaximas} hasta #{buscadorJuegosBean.maxPreguntasMaximas}" />
-										        <p:slider for="minPregM,maxPregM" display="displayRangepMax" style="width: 400px" range="true" displayTemplate="Desde {min} hasta {max} máximo de preguntas" disabled="true" onSlideEnd="rc()"/>
-										    </h:panelGrid>
-										    <h:inputHidden id="minPregM" value="#{buscadorJuegosBean.minPreguntasMaximas}"/>
-										    <h:inputHidden id="maxPregM" value="#{buscadorJuegosBean.maxPreguntasMaximas}"/>
-							        	</h:panelGrid>	
-				                	 </h:panelGrid>
-				                	 			
-				                </h:panelGrid>
-				                
-				                
-				            </p:panel>
-			            </div>
-			            <p:remoteCommand name="rc" update="juegoList" actionListener="#{buscadorJuegosBean.aplicarFiltros}" />
-			            
-			           
-			        </p:tab>
-			        
-			        <p:tab id="configuracion" title="Configuración">
-			            <p:panel header="Configuración de la partida">
-			                <p:messages />
-			                <h:panelGrid columns="2" columnClasses="label, value">
-			                
-			                	<h:form enctype="multipart/form-data">
-			                		<p:outputLabel value="Fichero de preguntas:"/>
-			 						<p:fileUpload label="Examinar..." mode="simple" skinSimple="false" dragDropSupport="true"/>
-			 					</h:form>
-			 					<br/>
-			 					
-			 					<p:outputLabel for="correctas" value="Factor de corrección:"/>
-			 					<p:spinner id="correctas" min="1" value="#{configurarPartida.correctas}"/>
-			 					
-			 					<p:outputLabel for="tiempo" value="Tiempo de respuesta:"/>
-			 					<p:spinner id="tiempo" min="1"/>
-			                </h:panelGrid>
-			            </p:panel>
-			            
-			        </p:tab>
-			        
-			        <p:tab id="equipos" title="Grupos y Equipos">
-			            <p:panel header="Configuración de los equipos">
-			                
-			                
-			                	
-			                	<h:form>
-			                	
-			                		<!--  Si no tiene json definido para los grupos y equipos-->
-			                		<p:outputLabel value="No existe configuración para grupos y equipos" rendered="#{configurarPartida.equipos == null}"/>
-				                	
-				                	<!-- Si hay grupos -->
-				                	<p:repeat var="varNGrupos" value="#{configurarPartida.equipos.grupos.numeroGrupos.variablesJuego}" 
-				                				rendered="#{configurarPartida.equipos.grupos != null}">
-				                		<p:outputLabel for="nGrupos" value="#{configurarPartida.equipos.grupos.numeroGrupos.textoWeb}"/>
-				                		<p:spinner id="nGrupos" min="#{configurarPartida.minimoGrupos}"
-				                							max="#{configurarPartida.maximoGrupos}"		         
-				                							value="#{varNGrupos.valor}" 
-				                							valueChangeListener="#{configurarPartida.numGruposChange}"
-				                							process="@form"
-				                							>
-				                		<p:ajax  update="confPartidaDialog"  oncomplete="PF('confPartidaDialog').show()"/>
-				                		</p:spinner><br/>
-				                		
-				                	</p:repeat>
-				                	
-				                	
-				                	<p:outputLabel value="#{configurarPartida.equipos.grupos.nombresGrupos.textoWeb}" 
-				                			rendered="#{configurarPartida.equipos.grupos != null}"/>	<br/>				
-				               		<p:repeat id="repetir" var="grupo" value="#{configurarPartida.nombresGrupos}" 
-				               		rendered="#{configurarPartida.equipos.grupos != null}">
-				                		<p:outputLabel for="labelGrupo" value="#{grupo.textoWeb}"/>		
-				                		<p:inputText id="labelGrupo" value="#{grupo.valor}" required="true"/><br/>
-				               		</p:repeat>
-				               		
-				               		<!-- Si hay equipos -->
-				               		
-			               			<p:repeat var="varNEquipos" value="#{configurarPartida.equipos.equipos.numeroEquipos.variablesJuego}" 
-				                				rendered="#{configurarPartida.equipos.equipos != null}">
-				                		<p:outputLabel for="nEquipos" value="#{configurarPartida.equipos.equipos.numeroEquipos.textoWeb}"/>
-				                		<p:spinner id="nEquipos" min="#{configurarPartida.minimoEquipos}"
-				                							max="#{configurarPartida.maximoEquipos}"		         
-				                							value="#{varNEquipos.valor}" 
-				                							valueChangeListener="#{configurarPartida.numEquiposChange}"
-				                							process="@form"
-				                							>
-				                		<p:ajax  update="confPartidaDialog"  oncomplete="PF('confPartidaDialog').show()"/>
-				                		</p:spinner><br/>
-				                		
-				                	</p:repeat><br/>
-				                	
-				                	
-				                	<p:dataGrid var="equipo" value="#{configurarPartida.listaEquipos}" columns="2" layout="grid" id="dataGridEquipos"
-				                		rendered="#{configurarPartida.equipos.equipos != null}">
-					               		<!-- <p:repeat id="repetir2" var="equipo" value="#{configurarPartida.listaEquipos}" 
-					               		rendered="#{configurarPartida.equipos.equipos != null}"> -->
-					               			
-					               			<p:panel>
-					               			<!-- Nombre del equipo -->
-					                		<p:outputLabel for="labelEquipo" style="font-weight:bold;font-size: 1.1em" value="#{equipo.nombreEquipo.textoWeb}"/>		
-					                		<p:inputText id="labelEquipo" value="#{equipo.nombreEquipo.valor}"/><br/>
-					                		<br/>
-					                		
-					                		<!-- Numero de grupos -->
-					                		<p:outputLabel for="nGrupoPorEquipo" value="#{equipo.numeroGrupos.textoWeb}"/>
-					                		<p:spinner id="nGrupoPorEquipo" min="#{equipo.numeroGrupos.rango.valorMinimo}"
-					                							max="#{equipo.numeroGrupos.rango.valorMaximo}"		         
-					                							value="#{equipo.numeroGrupos.variablesJuego.get(0).valor}" 
-					                							valueChangeListener="#{configurarPartida.numEquiposChange}"
-					                							process="@form"
-					                							>
-					                		<p:ajax  update="confPartidaDialog"  oncomplete="PF('confPartidaDialog').show()"/>
-					                		</p:spinner>
-					                		<br/>
-					                		
-					                		<!-- Nombres de los grupos -->
-					                		<p:repeat id="listarGruposEquipo" var="grupo" value="#{equipo.grupos}">
-						                		<p:outputLabel for="labelGruposEquipo" value="#{grupo.textoWeb}"/>		
-						                		<p:inputText id="labelGruposEquipo" value="#{grupo.valor}"/><br/>
-					               			</p:repeat>
-					               			
-					               			<br/><br/>
-					               			</p:panel>
-					               			
-					               		<!--</p:repeat> -->
-			                		</p:dataGrid>
-			              </h:form>
-			              <p:commandButton value="Guardar" actionListener="#{configurarPartida.guardar}">
-			                	<f:param name="id_profesor" value="#{loginBean.p.id}"/>
-			                </p:commandButton>
-			            </p:panel>
-			        </p:tab>
-		   		 </p:wizard>
- 			</h:form>
-		</p:dialog>
+									</p:orderList>
+								</h:panelGrid>
+								<p:fieldset legend="Filtrar" toggleable="true" toggleSpeed="500">
+					<p:panelGrid id="pgForm" styleClass="ui-noborder tablaFiltrado">
+						<p:remoteCommand name="rcFiltros" update="juegoList"
+							actionListener="#{configurarPartida.aplicarFiltros}"
+							process="pgForm" />
+						<h:form inline="true">
+							<p:row>
+								<p:column colspan="1" styleClass="columnasFiltrado">
+									<p:triStateCheckbox
+										value="#{configurarPartida.ilimitadasFiltro}"
+										itemLabel="Preguntas ilimitadas" onchange="rcFiltros()" />
+
+								</p:column>
+
+								
+								<p:column colspan="1" styleClass="columnasFiltrado">
+
+									<p:outputLabel for="minPregmin" value="Mínimo de preguntas:" />
+									<p:spinner id="minPregmin"
+										value="#{configurarPartida.minPreguntasMinimasFiltro}" min="0"
+										max="100" onchange="rcFiltros()" />
+									<p:outputLabel value="  -  " />
+									<p:spinner id="maxPregmin"
+										value="#{configurarPartida.maxPreguntasMinimasFiltro}" min="0"
+										max="100" onchange="rcFiltros()" />
+
+								</p:column>
+								
+								<p:column colspan="1" styleClass="columnasFiltrado">
+
+									<p:outputLabel for="minFichMin" value="Mínimo de ficheros:" />
+									<p:spinner id="minFichMin"
+										value="#{configurarPartida.minFicherosMinimosFiltro}" min="0"
+										max="100" onchange="rcFiltros()" />
+									<p:outputLabel value="  -  " />
+									<p:spinner id="maxFichMin"
+										value="#{configurarPartida.maxFicherosMinimosFiltro}" min="0"
+										max="100" onchange="rcFiltros()" />
+
+								</p:column>
+								
+								<p:column colspan="1" styleClass="columnasFiltrado">
+
+									<p:outputLabel for="minFichMax" value="Máximo de ficheros:" />
+									<p:spinner id="minFichMax"
+										value="#{configurarPartida.minFicherosMaximosFiltro}" min="0"
+										max="100" onchange="rcFiltros()" />
+									<p:outputLabel value="  -  " />
+									<p:spinner id="maxFichMax"
+										value="#{configurarPartida.maxFicherosMaximosFiltro}" min="0"
+										max="100" onchange="rcFiltros()" />
+
+								</p:column>
+								
+								
+
+
+							</p:row>
+						</h:form>
+
+						<p:row>
+							<p:column colspan="2">
+
+								<p:outputLabel for="respuesta" value="Forma de respuesta: " />
+								<p:selectCheckboxMenu id="respuesta"
+									value="#{configurarPartida.respuestaSelectFiltro}"
+									multiple="true" onchange="rcFiltros()"
+									styleClass="tablaFiltrado">
+									<f:selectItem itemLabel="Sin respuesta" itemValue="0"></f:selectItem>
+									<f:selectItem itemLabel="Respuestas con opciones (A,B,C,...)"
+										itemValue="1"></f:selectItem>
+									<f:selectItem itemLabel="Cifras" itemValue="2"></f:selectItem>
+									<f:selectItem itemLabel="Campos de texto" itemValue="3"></f:selectItem>
+									<f:selectItem itemLabel="Respuestas de relacionar"
+										itemValue="4"></f:selectItem>
+								</p:selectCheckboxMenu>
+							</p:column>
+
+							<p:column colspan="2">
+								<p:outputLabel for="etapa2" value="Etapa recomendada:" />
+								<p:selectCheckboxMenu id="etapa2"
+									value="#{configurarPartida.etapasFiltro}" label="e"
+									multiple="true" onchange="rcFiltros()"
+									styleClass="tablaFiltrado" updateLabel="true">
+									<f:selectItems value="#{configurarPartida.listaEtapas}" var="e"
+										itemLabel="#{e.descripcion}" itemValue="#{e.id}" />
+								</p:selectCheckboxMenu>
+							</p:column>
+
+						</p:row>
+					</p:panelGrid>
+				</p:fieldset>
+
+							</h:panelGrid>
+
+
+						</p:panel>
+					</div>
+					<p:remoteCommand name="rc" update="juegoList"
+						actionListener="#{configurarPartida.aplicarFiltros}" />
+
+
+				</p:tab>
+
+				<p:tab id="configuracion" title="Configuración">
+					<p:panel header="Configuración de la partida">
+						<p:messages />
+						<h:panelGrid columns="2" columnClasses="label, value">
+
+							<h:form enctype="multipart/form-data">
+								<p:outputLabel value="Fichero de preguntas:" />
+								<p:fileUpload label="Examinar..." mode="simple"
+									skinSimple="false" dragDropSupport="true" />
+							</h:form>
+							<br />
+
+							<p:outputLabel for="correctas" value="Factor de corrección:" />
+							<p:spinner id="correctas" min="1"
+								value="#{configurarPartida.correctas}" />
+
+							<p:outputLabel for="tiempo" value="Tiempo de respuesta:" />
+							<p:spinner id="tiempo" min="1"
+								value="#{configurarPartida.tiempoRespuesta}" />
+						</h:panelGrid>
+					</p:panel>
+
+				</p:tab>
+
+				<p:tab id="equipos" title="Grupos y Equipos">
+					<p:panel header="Configuración de los grupos y equipos">
+						<h:form>
+
+							<!--  Si no tiene json definido para los grupos y equipos-->
+							<p:outputLabel
+								value="No existe configuración para grupos y equipos"
+								rendered="#{configurarPartida.equipos == null}" />
+
+							<!-- Si hay grupos -->
+							<p:repeat var="varNGrupos"
+								value="#{configurarPartida.equipos.grupos.numeroGrupos.variablesJuego}"
+								rendered="#{configurarPartida.equipos.grupos != null}">
+								<p:outputLabel for="nGrupos"
+									value="#{configurarPartida.equipos.grupos.numeroGrupos.textoWeb}" />
+								<p:spinner id="nGrupos" min="#{configurarPartida.minimoGrupos}"
+									max="#{configurarPartida.maximoGrupos}"
+									value="#{varNGrupos.valor}"
+									valueChangeListener="#{configurarPartida.numGruposChange}"
+									process="@form">
+									<p:ajax update="confPartidaDialog"
+										oncomplete="PF('confPartidaDialog').show()" />
+								</p:spinner>
+								<br />
+
+							</p:repeat>
+
+
+							<p:outputLabel
+								value="#{configurarPartida.equipos.grupos.nombresGrupos.textoWeb}"
+								rendered="#{configurarPartida.equipos.grupos != null}" />
+							<br />
+							<p:repeat id="repetir" var="grupo"
+								value="#{configurarPartida.nombresGrupos}"
+								rendered="#{configurarPartida.equipos.grupos != null}">
+								<p:outputLabel for="labelGrupo" value="#{grupo.textoWeb}" />
+								<p:inputText id="labelGrupo" value="#{grupo.valor}"
+									required="true" />
+								<br />
+							</p:repeat>
+
+							<!-- Si hay equipos -->
+
+							<p:repeat var="varNEquipos"
+								value="#{configurarPartida.equipos.equipos.numeroEquipos.variablesJuego}"
+								rendered="#{configurarPartida.equipos.equipos != null}">
+								<p:outputLabel for="nEquipos"
+									value="#{configurarPartida.equipos.equipos.numeroEquipos.textoWeb}" />
+								<p:spinner id="nEquipos"
+									min="#{configurarPartida.minimoEquipos}"
+									max="#{configurarPartida.maximoEquipos}"
+									value="#{varNEquipos.valor}"
+									valueChangeListener="#{configurarPartida.numEquiposChange}"
+									process="@form">
+									<p:ajax update="confPartidaDialog"
+										oncomplete="PF('confPartidaDialog').show()" />
+								</p:spinner>
+								<br />
+
+							</p:repeat>
+							<br />
+
+
+							<p:dataGrid var="equipo"
+								value="#{configurarPartida.listaEquipos}" columns="2"
+								layout="grid" id="dataGridEquipos"
+								rendered="#{configurarPartida.equipos.equipos != null}">
+
+								<p:panel>
+									<!-- Nombre del equipo -->
+									<p:outputLabel for="labelEquipo"
+										style="font-weight:bold;font-size: 1.1em"
+										value="#{equipo.nombreEquipo.textoWeb}" />
+									<p:inputText id="labelEquipo"
+										value="#{equipo.nombreEquipo.valor}" />
+									<br />
+									<br />
+
+									<!-- Numero de grupos -->
+									<p:outputLabel for="nGrupoPorEquipo"
+										value="#{equipo.numeroGrupos.textoWeb}" />
+									<p:spinner id="nGrupoPorEquipo"
+										min="#{equipo.numeroGrupos.rango.valorMinimo}"
+										max="#{equipo.numeroGrupos.rango.valorMaximo}"
+										value="#{equipo.numeroGrupos.variablesJuego.get(0).valor}"
+										valueChangeListener="#{configurarPartida.numEquiposChange}"
+										process="@form">
+										<p:ajax update="confPartidaDialog"
+											oncomplete="PF('confPartidaDialog').show()" />
+									</p:spinner>
+									<br />
+
+									<!-- Nombres de los grupos -->
+									<p:repeat id="listarGruposEquipo" var="grupo"
+										value="#{equipo.grupos}">
+										<p:outputLabel for="labelGruposEquipo"
+											value="#{grupo.textoWeb}" />
+										<p:inputText id="labelGruposEquipo" value="#{grupo.valor}" />
+										<br />
+									</p:repeat>
+
+									<br />
+									<br />
+								</p:panel>
+
+								<!--</p:repeat> -->
+							</p:dataGrid>
+						</h:form>
+						<p:commandButton value="Guardar"
+							actionListener="#{configurarPartida.guardar}">
+							<f:param name="id_profesor" value="#{loginBean.p.id}" />
+						</p:commandButton>
+					</p:panel>
+				</p:tab>
+			</p:wizard>
+		</h:form>
+	</p:dialog>
 </h:body>
 </html>

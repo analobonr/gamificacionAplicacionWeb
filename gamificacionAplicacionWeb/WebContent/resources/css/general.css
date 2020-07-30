@@ -154,13 +154,12 @@ a[id*=home] {
 }
 
 #confPartidaDialog{
-	width: 1069px;
-
+	/*width: 1069px;
 	height: 472px;
-
-	left: 75px !important;
-
-	top: 75px !important;
+	left: 43% !important;
+	top: 50% !important;
+	margin-left: -150px;
+	margin-top: -150px;*/
 	
 }
 

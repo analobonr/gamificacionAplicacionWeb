@@ -22,202 +22,269 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import constantes.Configuracion;
 import constantes.Mensajes;
 import constantes.URLs;
-import pojos.Profesor;
-
 import constantes.valoresDesplegables;
 import constantes.valoresDesplegables.rol_t;
+import pojos.Profesor;
 
+/**
+ * Bean para gestionar el acceso a la aplicación
+ * 
+ * @author: Ana Lobón
+ * @version: 1.0 (03/05/2020)
+ */
 
-//Bean que gestiona el login a la aplicacion
 @ManagedBean
-public class LoginBean implements Serializable{
+public class LoginBean implements Serializable {
 
-	
 	private static final long serialVersionUID = 2057658592045182866L;
 
-	
-	//Propiedades para recoger los datos del formulario
+	// Propiedades para recoger los datos del formulario
 	private String email;
 	private String password;
-	
-	
-	
+
 	//Propiedad que recoge los datos del profesor logeado
 	private Profesor p;
 	private String rolUsuario = "";
-	
-	
-	
-	/**Metodo que procesa el login**/
+
+	/**
+	 * Método que procesa el login
+	 */
 	public void enviarDatos() {
-		
-		String redir = null;
-		
-		
-		//Comprobamos que se ha introducido mail y password
+
+		// Comprobamos que se ha introducido mail y password
 		if ((this.email != "") && (this.password != "")) {
+
+			// Peticion Rest para obtener el usuario
+			String url = URLs.USUARIO + this.getEmail() + "/" + this.getPassword();
 			
-			//Peticion Rest para obtener el usuario
-			String url = constantes.URLs.USUARIO + this.getEmail() + "/" + this.getPassword();
-			System.out.println("Petición de login: "+url);
 			try {
-			RestTemplate restTemplate = new RestTemplate();
-			ResponseEntity<Profesor> response = restTemplate.exchange(
-					url ,HttpMethod.GET, null, new ParameterizedTypeReference<Profesor>(){});
-			
-			//Obtenemos la respuesta
-			p = response.getBody();
-			
-			if (p.getRol() != rol_t.USER) {
-				this.setRolUsuario(valoresDesplegables.rolesMap.get(p.getRol()));
-			}else {
-				this.setRolUsuario("");
-			}
-			
-	    	if((!response.getStatusCode().is2xxSuccessful()) || (p == null) || (p.getEmail().length() == 0)) {
-				 FacesContext context = FacesContext.getCurrentInstance();
-			     context.addMessage(null, new FacesMessage(Mensajes.HEADERUPS,  Mensajes.ERRORACCESO) );
-			 }else {
-				 //Creamos la sesion del usuario
-				 HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-				 HttpSession userSession = request.getSession(true);
-				 userSession.setAttribute("profesor", p);
-				 
-				 FacesContext contex = FacesContext.getCurrentInstance();
-		         try {
-					contex.getExternalContext().redirect(URLs.URLIndex);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				RestTemplate restTemplate = new RestTemplate();
+				ResponseEntity<Profesor> response = restTemplate.exchange(url, HttpMethod.GET, null,
+						new ParameterizedTypeReference<Profesor>() {
+						});
+
+				// Obtenemos la respuesta
+				Profesor p = response.getBody();
+
+				//Si hay error mostramos mensaje de error
+				if ((!response.getStatusCode().is2xxSuccessful()) || (p == null) || (p.getEmail().length() == 0)) {
+					FacesContext context = FacesContext.getCurrentInstance();
+					context.addMessage(null, new FacesMessage(Mensajes.HEADERUPS, Mensajes.ERRORACCESO));
+				
+				//Si no hay error...
+				} else {
+					
+					// Iniciamos la sesion del usuario
+					this.iniciarSesion(p);
+					
+					//Asignamos el rol para mostrar en la pantalla de inicio
+					if (p.getRol() != rol_t.USER) {
+						this.setRolUsuario(valoresDesplegables.rolesMap.get(p.getRol()));
+					}else {
+						this.setRolUsuario("");
+					}
+
+					//Redirigimos al index (menu principal)-
+					FacesContext contex = FacesContext.getCurrentInstance();
+					try {
+						contex.getExternalContext().redirect(URLs.URLIndex);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						FacesContext contextEx = FacesContext.getCurrentInstance();
+						contextEx.addMessage(null, new FacesMessage(Mensajes.HEADERUPS, Mensajes.ERRORREDIRECCION));
+					}
 				}
-			 }
-			}catch(HttpServerErrorException httpe) {
+			} catch (HttpServerErrorException httpe) {
 				httpe.printStackTrace();
 				FacesContext context = FacesContext.getCurrentInstance();
-			    context.addMessage(null, new FacesMessage(Mensajes.HEADERUPS,  Mensajes.ERRORACCESO) );
+				context.addMessage(null, new FacesMessage(Mensajes.HEADERUPS, Mensajes.ERRORACCESO));
 			}
+		}else {
+			FacesContext contextEx = FacesContext.getCurrentInstance();
+			contextEx.addMessage(null, new FacesMessage(Mensajes.HEADERERROR, Mensajes.ERRORVALIDACIONACCESO));
 		}
-       
-    }
-	
-	
-	/** Metodo que genera una nueva password e informa por mail* */
+
+	}
+
+	/**
+	 * Método que genera una nueva password y la envía al email registrado
+	 * 
+	 */
 	public void enviarEmail() {
-		
-		
+
+		//Si se ha establecido email del usuario
 		if (email != "") {
-			
-			//Peticion para obtener una nueva password para el usuario
+
+			// Peticion GET para obtener una nueva password para el usuario
 			String url = constantes.URLs.USUARIO + this.email;
-			System.out.println("Petición nueva pass: "+url);
+			
 			RestTemplate restTemplate = new RestTemplate();
-			ResponseEntity<Profesor> response = restTemplate.exchange(
-					url ,HttpMethod.GET, null, new ParameterizedTypeReference<Profesor>(){});
 			
-			
-			//Obtenemos la respuesta
-	    	if(!response.getStatusCode().is2xxSuccessful()) {
-				 System.out.println("La petición ha fallado");
-				 FacesContext context = FacesContext.getCurrentInstance();
-			     context.addMessage(null, new FacesMessage(Mensajes.HEADERERROR,  Mensajes.ERRORNEWPASS));
-				 
-			//Enviamos el mail con la nueva password	 
-			}else {
-				p = response.getBody();
-			
-				//Configuramos las propiedades
+			try {
+			ResponseEntity<Profesor> response = restTemplate.exchange(url, HttpMethod.GET, null,
+					new ParameterizedTypeReference<Profesor>() {
+					});
+
+			//Si hay error mostramos mensaje de error
+			if (!response.getStatusCode().is2xxSuccessful()) {
+				
+				FacesContext context = FacesContext.getCurrentInstance();
+				context.addMessage(null, new FacesMessage(Mensajes.HEADERERROR, Mensajes.ERRORNEWPASS));
+
+			//Si no hay error...
+			} else {
+				
+				//Obtenemos el obtenemos el objeto con la info del profesor
+				Profesor p = response.getBody();
+				
+				//ENVIAMOS POR CORREO ELECTRONICO LA NUEVA PASS
+				
+				// Configuramos las propiedades
 				Properties properties = new Properties();
 				properties.put("mail.smtp.host", "smtp.gmail.com");
 				properties.put("mail.smtp.starttls.enable", "true");
-				properties.put("mail.smtp.port","587");
+				properties.put("mail.smtp.port", "587");
 				properties.put("mail.smtp.auth", "true");
-		 
+
 				//Preparamos la sesion
 				Session session = Session.getDefaultInstance(properties);
-				
-				String correoRemitente = "adjamail52@gmail.com";
-				String passwordRemitente = "ju3g0sd1d4ct1c0s";
+
+				// Preparamos el mensaje
+				String correoRemitente = Configuracion.REM_EMAIL;
+				String passwordRemitente = Configuracion.REM_PASSEMAIL;
 				String correoReceptor = email;
 				String asunto = Mensajes.ASUNTOMAIL;
-				String mensaje =  Mensajes.MENSAJEMAIL.replace("[NEWPASS]", p.getPassword());
-				
-				try{
-					//Construimos el mensaje
+				String mensaje = Mensajes.MENSAJEMAIL.replace("[NEWPASS]", p.getPassword());
+
+				try {
+					// Construimos el mensaje
 					MimeMessage message = new MimeMessage(session);
 					message.setFrom(new InternetAddress(correoRemitente));
 					message.addRecipient(Message.RecipientType.TO, new InternetAddress(correoReceptor));
 					message.setSubject(asunto);
 					message.setText(mensaje);
-					
-					//Enviamos el correo
+
+					// Enviamos el correo
 					Transport t = session.getTransport("smtp");
 					t.connect(correoRemitente, passwordRemitente);
 					t.sendMessage(message, message.getRecipients(Message.RecipientType.TO));
 					t.close();
-					
-					System.out.println("Correo enviado correctamente");
+
+					// Mensaje informativo 
 					FacesContext context = FacesContext.getCurrentInstance();
-			        context.addMessage(null, new FacesMessage(Mensajes.HEADERNEWPASS,  Mensajes.NEWPASS.replace("[MAIL]", correoReceptor)));
-			        
-			        
-				}catch (MessagingException me){
-		                
-					System.err.println("Error al enviar email: "+ me);
+					context.addMessage(null, new FacesMessage(Mensajes.HEADERNEWPASS,
+							Mensajes.NEWPASS.replace("[MAIL]", correoReceptor)));
+
+				} catch (MessagingException me) {
+					System.err.println(me);
 					FacesContext context = FacesContext.getCurrentInstance();
-					context.addMessage(null, new FacesMessage(Mensajes.HEADERERROR,  Mensajes.ERRORNEWPASS));
+					context.addMessage(null, new FacesMessage(Mensajes.HEADERERROR, Mensajes.ERRORENVIOMAIL));
 				}
-			 }
-		}else {
+			}
+			}catch(Exception e) {
+				System.err.println(e);
+				FacesContext context = FacesContext.getCurrentInstance();
+				context.addMessage(null, new FacesMessage(Mensajes.HEADERERROR, Mensajes.ERRORUSER));
+			}
+		} else {
 			FacesContext context = FacesContext.getCurrentInstance();
-	        context.addMessage(null, new FacesMessage(Mensajes.HEADERERROR,  Mensajes.ERRORNEWPASS2));
+			context.addMessage(null, new FacesMessage(Mensajes.HEADERERROR, Mensajes.ERRORNEWPASS2));
 		}
 		
+
 	}
 
-
-	//Cierra la sesion del usuario
+	/**
+	 * Método que cierra la sesión del usuario activo
+	 */
 	public void cerrarSesion() {
-		HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+		HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext()
+				.getRequest();
 		HttpSession userSession = request.getSession(true);
 		userSession.invalidate();
 	}
 	
-	/**GETTERS & SETTERS**/
+	
+	/**
+	 * Método que inicia una sesión para el usuario
+	 * @param p Profesor
+	 */
+	public void iniciarSesion(Profesor profesor) {
+		this.p = profesor;
+		HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance()
+				.getExternalContext().getRequest();
+		HttpSession userSession = request.getSession(true);
+		userSession.setAttribute("profesor", profesor);
+	}
+
+	// GETTERS & SETTERS
+
+	/**
+	 * Devuelve el email del usuario
+	 * 
+	 * @return Email del usuario
+	 */
 	public String getEmail() {
 		return email;
 	}
 
+	/**
+	 * Asigna el email del usuario
+	 * 
+	 * @param email Email del usuario
+	 */
+
 	public void setEmail(String email) {
 		this.email = email;
 	}
-	
+
+	/**
+	 * Devuelve la contraseña del usuario
+	 * 
+	 * @return Contraseña del usuario
+	 */
 	public String getPassword() {
 		return password;
 	}
 
+	/**
+	 * Asigna la contraseña del usuario
+	 * 
+	 * @param password Contraseña del usuario
+	 */
 	public void setPassword(String password) {
 		this.password = password;
 	}
-
+	
+	
+	/**
+	 * Devuelve el profesor de loggeado
+	 * @return Profesor
+	 */
 	public Profesor getP() {
 		return p;
 	}
 
-	public void setP(Profesor p) {
-		this.p = p;
-	}
 
-
+	/**
+	 * Devuelve el rol del usuario loggeado
+	 * @return Rol del usuario
+	 */
 	public String getRolUsuario() {
 		return rolUsuario;
 	}
 
 
+	/**
+	 * Asigna el rol del usuario loggeado
+	 * @param rolUsuario Rol del usuario
+	 */
 	public void setRolUsuario(String rolUsuario) {
 		this.rolUsuario = rolUsuario;
 	}
+
 }
-	
-	
